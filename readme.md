@@ -99,10 +99,12 @@ sudo numactl --membind=0 --cpubind=0 \
 
 After the UE associates, open another session check the UE IP address.
 
-# check UE IP address
+Check UE IP address
+```
 ifconfig oaitun_ue1
-
-# add a route toward the CN traffic gen node
+```
+Add a route toward the CN traffic gen node
+```
 sudo ip route add 192.168.70.0/24 dev oaitun_ue1
 ```
 
