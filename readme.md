@@ -36,10 +36,6 @@ OAI user or developer mailing lists to monitor and ask questions about the
 current status of OAI 5G:
 https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/MailingList.
 
-"""
-
-tourInstructions = """
-
 Startup scripts will still be running when your experiment becomes ready.
 Watch the "Startup" column on the "List View" tab for your experiment and wait
 until all of the compute nodes show "Finished" before proceeding.
