@@ -344,7 +344,7 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 # single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
-UE_node_x310(0, params.x310_radio_UE)
+UE_node_x310(1, params.x310_radio_UE)
 
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
