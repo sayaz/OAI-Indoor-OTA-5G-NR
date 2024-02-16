@@ -156,8 +156,6 @@ BIN_PATH = "/local/repository/bin"
 ETC_PATH = "/local/repository/etc"
 LOWLAT_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:U18LL-SRSLTE"
 UBUNTU_IMG = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD"
-#In case you want to use COTS UE, uncomment below line
-#COTS_UE_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:cots-jammy-image"
 COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432"
 DEFAULT_NR_CN_HASH = "v1.5.0"
@@ -269,7 +267,6 @@ pc.defineParameter(
     advanced=True
 )
 
-
 pc.defineParameter(
     name="sdr_compute_image",
     description="Image to use for compute connected to SDRs",
@@ -285,7 +282,6 @@ indoor_ota_x310s = [
      "USRP X310 #2"),
 ]
 
-
 pc.defineParameter(
     name="x310_radio",
     description="X310 Radio (for OAI gNodeB)",
@@ -294,6 +290,29 @@ pc.defineParameter(
     legalValues=indoor_ota_x310s
 )
 
+portal.context.defineStructParameter(
+    "freq_ranges", "Frequency Ranges To Transmit In",
+    defaultValue=[{"freq_min": 3550.0, "freq_max": 3600.0}],
+    multiValue=True,
+    min=0,
+    multiValueTitle="Frequency ranges to be used for transmission.",
+    members=[
+        portal.Parameter(
+            "freq_min",
+            "Frequency Range Min",
+            portal.ParameterType.BANDWIDTH,
+            3550.0,
+            longDescription="Values are rounded to the nearest kilohertz."
+        ),
+        portal.Parameter(
+            "freq_max",
+            "Frequency Range Max",
+            portal.ParameterType.BANDWIDTH,
+            3600.0,
+            longDescription="Values are rounded to the nearest kilohertz."
+        ),
+    ]
+)
 
 params = pc.bindParameters()
 pc.verifyParameters()
@@ -318,8 +337,9 @@ else:
 cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
-# single x310 for now
+# single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
+UE_node_x310(0, params.x310_radio)
 
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
