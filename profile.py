@@ -222,6 +222,11 @@ def UE_node_x310(idx, x310_radio):
 	radio.component_manager_id = COMP_MANAGER_ID
 	radio_link.addNode(radio)
 
+	if params.oai_ran_commit_hash:
+		oai_ran_hash = params.oai_ran_commit_hash
+	else:
+		oai_ran_hash = DEFAULT_NR_RAN_HASH
+
 	cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
 	ue.addService(rspec.Execute(shell="bash", command=cmd))
 	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
