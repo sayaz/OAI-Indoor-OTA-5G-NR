@@ -148,8 +148,11 @@ BIN_PATH = "/local/repository/bin"
 ETC_PATH = "/local/repository/etc"
 LOWLAT_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:U18LL-SRSLTE"
 UBUNTU_IMG = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD"
+COTS_UE_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:cots-jammy-image"
 COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
-DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432"
+# old hash from branch bandwidth-testing-abs-sr-bsr-multiple_ue
+#TODO: check if merged to develop or develop now supports multiple UEs
+DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432" # 2023.wk19
 DEFAULT_NR_CN_HASH = "v1.5.0"
 OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
 
