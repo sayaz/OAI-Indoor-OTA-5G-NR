@@ -190,16 +190,16 @@ def x310_node_pair(idx, x310_radio):
         oai_ran_hash = DEFAULT_NR_RAN_HASH
 
 	cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	node.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd ="chmod +x /local/repository/bin/common.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	node.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	node.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd ="chmod +x /local/repository/bin/tune-sdr-iface.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	node.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
 	node.addService(rspec.Execute(shell="bash", command=cmd))
@@ -235,16 +235,16 @@ def UE_node_x310(idx, x310_radio):
 		oai_ran_hash = DEFAULT_NR_RAN_HASH
 
 	cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd ="chmod +x /local/repository/bin/common.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd ="chmod +x /local/repository/bin/tune-sdr-iface.sh"
-	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
 	cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
 	ue.addService(rspec.Execute(shell="bash", command=cmd))
