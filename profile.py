@@ -12,14 +12,14 @@ import geni.rspec.emulab.spectrum as spectrum
 tourDescription = """
 ### OAI 5G using the POWDER Indoor OTA Lab
 
-This profile instantiates an experiment for testing OAI 5G with COTS UEs in
+This profile instantiates an experiment for testing OAI 5G with SDR-UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
-- 2x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
+- 1x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
   TX/RX and RX2 ports on this channel are connected to broadband antennas. The
   SDRs are connected via fiber to near-edge compute resources.
-- OAI 5G nrUE
+- 1x NI X310 SDR for nrUE with a compute node
 
 You can find a diagram of the lab layout here: [OTA Lab
 Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
@@ -36,18 +36,10 @@ It's also strongly recommended that you include the following necessary
 resources in your reservation to gaurantee their availability at the time of
 your experiment:
 
-- A d430 compute node to host the core network
-- A d740 compute node for the gNodeB
+- 2 x d430 compute node to host the core network and UE
+- 1 x d740 compute node for the gNodeB
 - One of the four indoor OTA X310s for gNB
 - One of the four indoor OTA x310s for UE
-
-#### Bleeding-edge Software Caveats!
-
-You may see warnings, errors, crashes, etc, when running the OAI gNodeB soft
-modem. The COTS modules may sometimes fail to attach. Please subscribe to the
-OAI user or developer mailing lists to monitor and ask questions about the
-current status of OAI 5G:
-https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/MailingList.
 
 """
 
