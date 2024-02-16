@@ -201,10 +201,10 @@ def x310_node_pair(idx, x310_radio):
 	cmd ="chmod +x /local/repository/bin/tune-sdr-iface.sh"
 	cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
-    cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-    node.addService(rspec.Execute(shell="bash", command=cmd))
-    node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+	cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+	node.addService(rspec.Execute(shell="bash", command=cmd))
+	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 def UE_node_x310(idx, x310_radio):
 	role = "ue"
