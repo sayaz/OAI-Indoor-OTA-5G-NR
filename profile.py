@@ -321,35 +321,6 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 # single x310 for now
 x310_node_pair(0, params.x310_radio)
 
-
-
-role = "ue"
-ue = request.RawPC("nrue-comp")
-ue.component_manager_id = COMP_MANAGER_ID
-ue.hardware_type = params.sdr_nodetype
-if params.sdr_compute_image:
-    ue.disk_image = params.sdr_compute_image
-else:
-    ue.disk_image = UBUNTU_IMG
-
-ue_usrp_if = ue.addInterface("ue-usrp-if")
-ue_usrp_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
-cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-ue.addService(rspec.Execute(shell="bash", command=cmd))
-ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
-
-ue_sdr = request.RawPC("nrue-sdr")
-ue_sdr.component_manager_id = COMP_MANAGER_ID
-ue_sdr.component_id = BENCH_SDR_IDS[params.bench_id][1]
-ue_sdr_if = ue_sdr.addInterface("ue-sdr-if")
-
-ue_sdr_link = request.Link("ue-sdr-link")
-ue_sdr_link.bandwidth = 10*1000*1000
-ue_sdr_link.addInterface(ue_usrp_if)
-ue_sdr_link.addInterface(ue_sdr_if)
-
-
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
 
