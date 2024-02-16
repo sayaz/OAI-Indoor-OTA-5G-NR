@@ -355,6 +355,10 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 cmd ="chmod +x /local/repository/bin/tune-sdr-iface.sh"
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
+cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
+cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+
+
 # single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
 UE_node_x310(1, params.x310_radio_UE)
