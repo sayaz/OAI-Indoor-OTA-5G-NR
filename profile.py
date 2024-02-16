@@ -216,13 +216,13 @@ def UE_node_x310(idx, x310_radio):
 	ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
 
 	radio_link = request.Link("radio-link-{}".format(idx))
-    radio_link.bandwidth = 10*1000*1000
-    radio_link.addInterface(ue_radio_if)
+	radio_link.bandwidth = 10*1000*1000
+	radio_link.addInterface(ue_radio_if)
 
-    radio = request.RawPC("{}-ue-sdr".format(x310_radio))
-    radio.component_id = x310_radio
-    radio.component_manager_id = COMP_MANAGER_ID
-    radio_link.addNode(radio)
+	radio = request.RawPC("{}-ue-sdr".format(x310_radio))
+	radio.component_id = x310_radio
+	radio.component_manager_id = COMP_MANAGER_ID
+	radio_link.addNode(radio)
 
 	cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
 	ue.addService(rspec.Execute(shell="bash", command=cmd))
