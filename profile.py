@@ -273,10 +273,10 @@ pc.defineParameter(
 )
 
 indoor_ota_x310s = [
-    ("ota-x310-1",
-     "USRP X310 #1"),
     ("ota-x310-2",
      "USRP X310 #2"),
+    ("ota-x310-3",
+     "USRP X310 #3"),
 ]
 
 pc.defineParameter(
@@ -288,7 +288,7 @@ pc.defineParameter(
 )
 
 pc.defineParameter(
-    name="x310_radio",
+    name="x310_radio_UE",
     description="X310 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[1],
@@ -344,7 +344,7 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 # single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
-UE_node_x310(0, params.x310_radio)
+UE_node_x310(0, params.x310_radio_UE)
 
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
