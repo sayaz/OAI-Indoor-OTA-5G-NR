@@ -281,15 +281,23 @@ indoor_ota_x310s = [
 
 pc.defineParameter(
     name="x310_radio",
-    description="X310 Radio (for OAI gNodeB / ue)",
+    description="X310 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[0],
     legalValues=indoor_ota_x310s
 )
 
+pc.defineParameter(
+    name="x310_radio",
+    description="X310 Radio (for OAI UE)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_x310s[1],
+    legalValues=indoor_ota_x310s
+)
+
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
-    defaultValue=[{"freq_min": 3550.0, "freq_max": 3600.0}],
+    defaultValue=[{"freq_min": 5734.0, "freq_max": 5774.0}],
     multiValue=True,
     min=0,
     multiValueTitle="Frequency ranges to be used for transmission.",
