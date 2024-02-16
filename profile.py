@@ -16,12 +16,10 @@ This profile instantiates an experiment for testing OAI 5G with COTS UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
-- 4x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
+- 2x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
   TX/RX and RX2 ports on this channel are connected to broadband antennas. The
   SDRs are connected via fiber to near-edge compute resources.
-- 4x Intel NUC compute nodes, each equipped with a Quectel RM500Q-GL 5G module
-  that has been provisioned with a SIM card. The NUCs are also equipped with NI
-  B210 SDRs, but they are not the focus of this profile.
+- OAI 5G nrUE
 
 You can find a diagram of the lab layout here: [OTA Lab
 Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
@@ -40,8 +38,8 @@ your experiment:
 
 - A d430 compute node to host the core network
 - A d740 compute node for the gNodeB
-- One of the four indoor OTA X310s
-- All four indoor OTA NUCs
+- One of the four indoor OTA X310s for gNB
+- One of the four indoor OTA x310s for UE
 
 #### Bleeding-edge Software Caveats!
 
@@ -154,5 +152,211 @@ Known Issues and Workarounds:
 
 """
 
+BIN_PATH = "/local/repository/bin"
+ETC_PATH = "/local/repository/etc"
+LOWLAT_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:U18LL-SRSLTE"
+UBUNTU_IMG = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD"
+#In case you want to use COTS UE, uncomment below line
+#COTS_UE_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:cots-jammy-image"
+COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
+DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432"
+DEFAULT_NR_CN_HASH = "v1.5.0"
+OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
 
+
+def x310_node_pair(idx, x310_radio):
+    role = "nodeb"
+    node = request.RawPC("{}-gnb-comp".format(x310_radio))
+    node.component_manager_id = COMP_MANAGER_ID
+    node.hardware_type = params.sdr_nodetype
+
+    if params.sdr_compute_image:
+        node.disk_image = params.sdr_compute_image
+    else:
+        node.disk_image = UBUNTU_IMG
+
+    node_radio_if = node.addInterface("usrp_if")
+    node_radio_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
+
+    radio_link = request.Link("radio-link-{}".format(idx))
+    radio_link.bandwidth = 10*1000*1000
+    radio_link.addInterface(node_radio_if)
+
+    radio = request.RawPC("{}-gnb-sdr".format(x310_radio))
+    radio.component_id = x310_radio
+    radio.component_manager_id = COMP_MANAGER_ID
+    radio_link.addNode(radio)
+
+    nodeb_cn_if = node.addInterface("nodeb-cn-if")
+    nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
+    cn_link.addInterface(nodeb_cn_if)
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
+
+    cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    node.addService(rspec.Execute(shell="bash", command=cmd))
+    node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
+def UE_node_x310(idx, x310_radio):
+	role = "ue"
+	ue = request.RawPC("{}-ue-comp".format(x310_radio))
+	ue.component_manager_id = COMP_MANAGER_ID
+	ue.hardware_type = params.sdr_nodetype
+
+	if params.sdr_compute_image:
+		ue.disk_image = params.sdr_compute_image
+	else:
+		ue.disk_image = UBUNTU_IMG
+
+	ue_radio_if = ue.addInterface("ue-usrp-if")
+	ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
+
+	radio_link = request.Link("radio-link-{}".format(idx))
+    radio_link.bandwidth = 10*1000*1000
+    radio_link.addInterface(ue_radio_if)
+
+    radio = request.RawPC("{}-ue-sdr".format(x310_radio))
+    radio.component_id = x310_radio
+    radio.component_manager_id = COMP_MANAGER_ID
+    radio_link.addNode(radio)
+
+	cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
+	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
+
+pc = portal.Context()
+
+node_types = [
+    ("d430", "Emulab, d430"),
+    ("d740", "Emulab, d740"),
+]
+
+pc.defineParameter(
+    name="sdr_nodetype",
+    description="Type of compute node paired with the SDRs",
+    typ=portal.ParameterType.STRING,
+    defaultValue=node_types[1],
+    legalValues=node_types
+)
+
+pc.defineParameter(
+    name="cn_nodetype",
+    description="Type of compute node to use for CN node (if included)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=node_types[0],
+    legalValues=node_types
+)
+
+pc.defineParameter(
+    name="oai_ran_commit_hash",
+    description="Commit hash for OAI RAN",
+    typ=portal.ParameterType.STRING,
+    defaultValue="",
+    advanced=True
+)
+
+pc.defineParameter(
+    name="oai_cn_commit_hash",
+    description="Commit hash for OAI (5G)CN",
+    typ=portal.ParameterType.STRING,
+    defaultValue="",
+    advanced=True
+)
+
+
+pc.defineParameter(
+    name="sdr_compute_image",
+    description="Image to use for compute connected to SDRs",
+    typ=portal.ParameterType.STRING,
+    defaultValue="",
+    advanced=True
+)
+
+indoor_ota_x310s = [
+    ("ota-x310-1",
+     "USRP X310 #1"),
+    ("ota-x310-2",
+     "USRP X310 #2"),
+]
+
+
+pc.defineParameter(
+    name="x310_radio",
+    description="X310 Radio (for OAI gNodeB)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_x310s[0],
+    legalValues=indoor_ota_x310s
+)
+
+
+params = pc.bindParameters()
+pc.verifyParameters()
+request = pc.makeRequestRSpec()
+
+role = "cn"
+cn_node = request.RawPC("cn5g-docker-host")
+cn_node.component_manager_id = COMP_MANAGER_ID
+cn_node.hardware_type = params.cn_nodetype
+cn_node.disk_image = UBUNTU_IMG
+cn_if = cn_node.addInterface("cn-if")
+cn_if.addAddress(rspec.IPv4Address("192.168.1.1", "255.255.255.0"))
+cn_link = request.Link("cn-link")
+cn_link.bandwidth = 10*1000*1000
+cn_link.addInterface(cn_if)
+
+if params.oai_cn_commit_hash:
+    oai_cn_hash = params.oai_cn_commit_hash
+else:
+    oai_cn_hash = DEFAULT_NR_CN_HASH
+
+cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
+cn_node.addService(rspec.Execute(shell="bash", command=cmd))
+
+# single x310 for now
+x310_node_pair(0, params.x310_radio)
+
+
+
+role = "ue"
+ue = request.RawPC("nrue-comp")
+ue.component_manager_id = COMP_MANAGER_ID
+ue.hardware_type = params.sdr_nodetype
+if params.sdr_compute_image:
+    ue.disk_image = params.sdr_compute_image
+else:
+    ue.disk_image = UBUNTU_IMG
+
+ue_usrp_if = ue.addInterface("ue-usrp-if")
+ue_usrp_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
+cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+ue.addService(rspec.Execute(shell="bash", command=cmd))
+ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
+ue_sdr = request.RawPC("nrue-sdr")
+ue_sdr.component_manager_id = COMP_MANAGER_ID
+ue_sdr.component_id = BENCH_SDR_IDS[params.bench_id][1]
+ue_sdr_if = ue_sdr.addInterface("ue-sdr-if")
+
+ue_sdr_link = request.Link("ue-sdr-link")
+ue_sdr_link.bandwidth = 10*1000*1000
+ue_sdr_link.addInterface(ue_usrp_if)
+ue_sdr_link.addInterface(ue_sdr_if)
+
+
+for frange in params.freq_ranges:
+    request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
+
+tour = IG.Tour()
+tour.Description(IG.Tour.MARKDOWN, tourDescription)
+tour.Instructions(IG.Tour.MARKDOWN, tourInstructions)
+request.addTour(tour)
+
+pc.printRequestRSpec(request)
 
