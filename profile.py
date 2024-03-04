@@ -349,10 +349,8 @@ indoor_ota_x310s = [
 ]
 
 indoor_ota_b210s = [
-    ("ota-nuc3",
-        "OTA-NUC #1"),
-    ("ota-nuc4",
-        "OTA-NUC #2"),
+    "ota-nuc3",
+    "ota-nuc4",
 ]
 
 
