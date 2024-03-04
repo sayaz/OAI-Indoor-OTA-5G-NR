@@ -266,7 +266,7 @@ def b210_nuc_pair(idx, b210_radio):
     radio = request.RawPC("{}-ue-sdr".format(b210_radio))
     radio.component_id = b210_radio
     radio.component_manager_id = COMP_MANAGER_ID
-    radio_link.addNode(radio)
+    # radio_link.addNode(radio)
 
     if params.oai_ran_commit_hash:
         oai_ran_hash = params.oai_ran_commit_hash
