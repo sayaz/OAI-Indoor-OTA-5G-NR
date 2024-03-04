@@ -349,24 +349,24 @@ indoor_ota_x310s = [
 ]
 
 indoor_ota_b210s = [
-    "ota-nuc3",
-    "ota-nuc4",
+    ("ota-nuc3", "UE # 1"),
+    ("ota-nuc4", "UE # 2"),
 ]
 
 
-portal.context.defineStructParameter(
-    "b210_radio", "Indoor OTA B210 Radios", [],
-    multiValue=True, 
-    min=1, max=None,
-    members=[
-        portal.Parameter(
-            "node_id",
-            "OTA B210",
-            portal.ParameterType.STRING,
-            indoor_ota_b210s[0], 
-            indoor_ota_b210s)
-        ],
-)
+# portal.context.defineStructParameter(
+#     "b210_radio", "Indoor OTA B210 Radios", [],
+#     multiValue=True, 
+#     min=1, max=None,
+#     members=[
+#         portal.Parameter(
+#             "node_id",
+#             "OTA B210",
+#             portal.ParameterType.STRING,
+#             indoor_ota_b210s[0], 
+#             indoor_ota_b210s)
+#         ],
+# )
 
 pc.defineParameter(
     name="x310_radio",
@@ -376,13 +376,13 @@ pc.defineParameter(
     legalValues=indoor_ota_x310s
 )
 
-# pc.defineParameter(
-#     name="b210_radio",
-#     description="b210 Radio (for OAI UE)",
-#     typ=portal.ParameterType.STRING,
-#     defaultValue=indoor_ota_b210s[0],
-#     legalValues=indoor_ota_b210s
-# )
+pc.defineParameter(
+    name="b210_radio",
+    description="b210 Radio (for OAI UE)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_b210s[0],
+    legalValues=indoor_ota_b210s
+)
 
 
 
