@@ -263,7 +263,7 @@ def b210_nuc_pair(idx, b210_radio):
     else:
         ue.disk_image = UBUNTU_IMG
 
-    ue.component_id = b210_node
+    ue.component_id = b210_radio
     
    
 
