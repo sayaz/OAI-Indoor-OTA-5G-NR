@@ -354,9 +354,10 @@ indoor_ota_b210s = [
 ]
 
 
-pc.defineStructParameter(
-    "UE_nodes", "Indoor OTA B210 Radios",
-    multiValue=True, min=1, max=None,
+portal.context.defineStructParameter(
+    "UE_nodes", "Indoor OTA B210 Radios", [],
+    multiValue=True, 
+    min=1, max=None,
     members=[
         portal.Parameter(
             "node_id",
@@ -365,7 +366,7 @@ pc.defineStructParameter(
             indoor_ota_b210s[0], 
             indoor_ota_b210s)
         ],
-        )
+)
 
 pc.defineParameter(
     name="x310_radio",
