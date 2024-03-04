@@ -252,6 +252,22 @@ def UE_node_x310(idx, x310_radio):
 	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 
+def b210_nuc_pair(idx, b210_radio):
+    role = "ue"
+    ue = request.RawPC("{}-ue-comp".format(b210_radio))
+    ue.component_manager_id = COMP_MANAGER_ID
+    ue.hardware_type = params.sdr_nodetype
+
+    if params.sdr_compute_image:
+        ue.disk_image = params.sdr_compute_image
+    else:
+        ue.disk_image = UBUNTU_IMG
+
+    ue.component_id = b210_node
+    
+   
+
+
 pc = portal.Context()
 
 node_types = [
@@ -322,6 +338,18 @@ pc.defineParameter(
     legalValues=indoor_ota_x310s
 )
 
+indoor_ota_nucs = [
+    ("ota-nuc%d" % (i,), "Indoor OTA nuc#%d with B210 and COTS UE" % (i,)) for i in range(1, 5) ]
+pc.defineStructParameter(
+    "b210_nodes", "Indoor OTA NUC with B210 and COTS UE",
+    [ { "node_id": "ota-nuc3" } ],
+    multiValue=True, min=1, max=len(indoor_ota_nucs),
+    members=[
+        portal.Parameter(
+            "node_id", "Indoor OTA NUC", portal.ParameterType.STRING,
+            indoor_ota_nucs[0], indoor_ota_nucs)])
+
+
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
     defaultValue=[{"freq_min": 5734.0, "freq_max": 5774.0}],
@@ -379,7 +407,12 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 # single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
-UE_node_x310(1, params.x310_radio_UE)
+# UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
+
+#indoor OTA nucs for now
+for b210_node in params.b210_nodes:
+    b210_nuc_pair(b210_node.node_id)
+
 
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
