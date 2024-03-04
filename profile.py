@@ -256,7 +256,7 @@ def b210_nuc_pair(idx, b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
-    ue.hardware_type = params.sdr_nodetype
+    ue.hardware_type = params.sdr_nodetype # d430
 
     if params.sdr_compute_image:
         ue.disk_image = params.sdr_compute_image
