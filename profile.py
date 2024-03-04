@@ -417,8 +417,8 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 x310_node_pair(0, params.x310_radio)
 # UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
-#indoor OTA nucs for now
-b210_nuc_pair(0, param.b210_radio)
+# Single b210 for UE
+b210_nuc_pair(0, params.b210_radio)
 
 
 for frange in params.freq_ranges:
