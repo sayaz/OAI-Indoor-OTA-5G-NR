@@ -256,6 +256,7 @@ def b210_nuc_pair(idx, b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
+    ue.component_id = b210_radio
     ue.hardware_type = params.sdr_nodetype # d430
 
     if params.sdr_compute_image:
@@ -263,9 +264,9 @@ def b210_nuc_pair(idx, b210_radio):
     else:
         ue.disk_image = UBUNTU_IMG
 
-    radio = request.RawPC("{}-ue-sdr".format(b210_radio))
-    radio.component_id = b210_radio
-    radio.component_manager_id = COMP_MANAGER_ID
+    # radio = request.RawPC("{}-ue-sdr".format(b210_radio))
+    
+    # radio.component_manager_id = COMP_MANAGER_ID
     # radio_link.addNode(radio)
 
     if params.oai_ran_commit_hash:
@@ -355,14 +356,14 @@ indoor_ota_b210s = [
 ]
 
 
-# pc.defineStructParameter(
-#     "b210_radio", "Indoor OTA NUC with B210 and COTS UE",
-#     [ { "node_id": "ota-nuc3" } ],
-#     multiValue=True, min=1, max=len(indoor_ota_b210s),
-#     members=[
-#         portal.Parameter(
-#             "node_id", "Indoor OTA NUC", portal.ParameterType.STRING,
-#             indoor_ota_b210s[0], indoor_ota_b210s)])
+pc.defineStructParameter(
+    "b210_radio", "Indoor OTA NUC with B210 and COTS UE",
+    [ { "node_id": "ota-nuc3" } ],
+    multiValue=True, min=1, max=len(indoor_ota_b210s),
+    members=[
+        portal.Parameter(
+            "node_id", "Indoor OTA NUC", portal.ParameterType.STRING,
+            indoor_ota_b210s[0], indoor_ota_b210s)])
 
 pc.defineParameter(
     name="x310_radio",
@@ -372,13 +373,13 @@ pc.defineParameter(
     legalValues=indoor_ota_x310s
 )
 
-pc.defineParameter(
-    name="b210_radio",
-    description="b210 Radio (for OAI UE)",
-    typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[0],
-    legalValues=indoor_ota_b210s
-)
+# pc.defineParameter(
+#     name="b210_radio",
+#     description="b210 Radio (for OAI UE)",
+#     typ=portal.ParameterType.STRING,
+#     defaultValue=indoor_ota_b210s[0],
+#     legalValues=indoor_ota_b210s
+# )
 
 
 
