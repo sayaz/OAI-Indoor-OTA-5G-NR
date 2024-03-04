@@ -263,7 +263,32 @@ def b210_nuc_pair(idx, b210_radio):
     else:
         ue.disk_image = UBUNTU_IMG
 
-    ue.component_id = b210_radio
+    radio = request.RawPC("{}-ue-sdr".format(b310_radio))
+    radio.component_id = b210_radio
+    radio.component_manager_id = COMP_MANAGER_ID
+    radio_link.addNode(radio)
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
+
+    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/common.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
+
+
     
    
 
@@ -351,7 +376,7 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[1],
+    defaultValue=indoor_ota_b210s[0],
     legalValues=indoor_ota_b210s
 )
 
