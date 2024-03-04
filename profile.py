@@ -418,7 +418,7 @@ x310_node_pair(0, params.x310_radio)
 # UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 #indoor OTA nucs for now
-for b210_node in params.b210_nodes:
+for b210_node in params.b210_radio:
     b210_nuc_pair(b210_node.node_id)
 
 
