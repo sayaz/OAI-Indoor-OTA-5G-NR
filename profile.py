@@ -348,26 +348,26 @@ indoor_ota_x310s = [
      "USRP X310 #2"),
 ]
 
-# indoor_ota_b210s = [
-#     ("ota-nuc3",
-#         "OTA-NUC #1"),
-#     ("ota-nuc4",
-#         "OTA-NUC #2"),
-# ]
-
-
 indoor_ota_b210s = [
-    ("ota-nuc%d" % (i,), "Indoor OTA nuc#%d with B210 and COTS UE" % (i,)) for i in range(1, 5) ]
+    ("ota-nuc3",
+        "OTA-NUC #1"),
+    ("ota-nuc4",
+        "OTA-NUC #2"),
+]
 
 
 pc.defineStructParameter(
-    "b210_radio", "Indoor OTA NUC with B210 and COTS UE",
-    [ { "node_id": "ota-nuc3" } ],
-    multiValue=True, min=1, max=len(indoor_ota_b210s),
+    "UE_nodes", "Indoor OTA B210 Radios",
+    multiValue=True, min=1, max=None,
     members=[
         portal.Parameter(
-            "node_id", "Indoor OTA NUC", portal.ParameterType.STRING,
-            indoor_ota_b210s[0], indoor_ota_b210s)])
+            "node_id",
+            "OTA B210",
+            portal.ParameterType.STRING,
+            indoor_ota_b210s[0], 
+            indoor_ota_b210s)
+        ],
+        )
 
 pc.defineParameter(
     name="x310_radio",
