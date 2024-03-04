@@ -252,7 +252,7 @@ def x310_node_pair(idx, x310_radio):
 # 	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 
-def b210_nuc_pair(idx, b210_radio):
+def b210_nuc_pair(b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
@@ -355,7 +355,7 @@ indoor_ota_b210s = [
 
 
 portal.context.defineStructParameter(
-    "UE_nodes", "Indoor OTA B210 Radios", [],
+    "b210_radio", "Indoor OTA B210 Radios", [],
     multiValue=True, 
     min=1, max=None,
     members=[
@@ -447,7 +447,7 @@ x310_node_pair(0, params.x310_radio)
 # UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 # Single b210 for UE
-b210_nuc_pair(0, params.b210_radio)
+b210_nuc_pair(b210_radio)
 
 
 for frange in params.freq_ranges:
