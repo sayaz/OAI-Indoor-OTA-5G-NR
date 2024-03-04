@@ -263,7 +263,7 @@ def b210_nuc_pair(idx, b210_radio):
     else:
         ue.disk_image = UBUNTU_IMG
 
-    radio = request.RawPC("{}-ue-sdr".format(b310_radio))
+    radio = request.RawPC("{}-ue-sdr".format(b210_radio))
     radio.component_id = b210_radio
     radio.component_manager_id = COMP_MANAGER_ID
     radio_link.addNode(radio)
