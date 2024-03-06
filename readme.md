@@ -13,32 +13,11 @@ Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/
 
 The following will be deployed:
 
-- Server-class compute node (d430) with a Docker-based OAI 5G Core Network
-- Server-class compute node (d740) with OAI 5G gNodeB (fiber connection to 5GCN and an X310)
-- OAI 5G nrUE
-
-Note: This profile currently requires the use of the 3550-3600 MHz spectrum
-range and you need an approved reservation for this spectrum in order to use it.
-It's also strongly recommended that you include the following necessary
-resources in your reservation to gaurantee their availability at the time of
-your experiment:
-
 - A d430 compute node to host the core network
 - A d740 compute node for the gNodeB
 - One of the four indoor OTA X310s
-- One of the four indoor OTA x310s as UE
-
-#### Bleeding-edge Software Caveats!
-
-You may see warnings, errors, crashes, etc, when running the OAI gNodeB soft
-modem. The COTS modules may sometimes fail to attach. Please subscribe to the
-OAI user or developer mailing lists to monitor and ask questions about the
-current status of OAI 5G:
-https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/MailingList.
-
-Startup scripts will still be running when your experiment becomes ready.
-Watch the "Startup" column on the "List View" tab for your experiment and wait
-until all of the compute nodes show "Finished" before proceeding.
+- One of the four indoor OTA B210 as UE
+- NUC compute node for UE
 
 After all startup scripts have finished...
 
@@ -48,8 +27,7 @@ If you'd like to monitor traffic between the various network functions and the
 gNodeB, start tshark in a session:
 
 ```
-sudo tshark -i demo-oai \
-  -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com"
+sudo tshark -i demo-oai -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com"
 ```
 
 In another session, start the 5G core network services. It will take several
@@ -71,10 +49,7 @@ sudo docker logs -f oai-amf
 On `nodeb`:
 
 ```
-sudo numactl --membind=0 --cpubind=0 \
-  /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E \
-  -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa \
-  --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
+sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
 
 On `ue`:
@@ -82,19 +57,7 @@ On `ue`:
 After you've started the gNodeB, start the UE:
 
 ```
-sudo numactl --membind=0 --cpubind=0 \
-  /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E \
-  -O /var/tmp/etc/oai/ue.conf \
-  -r 106 \
-  -C 3619200000 \
-  --usrp-args "clock_source=external,type=x300" \
-  --band 78 \
-  --numerology 1 \
-  --ue-txgain 0 \
-  --ue-rxgain 104 \
-  --nokrnmod \
-  --dlsch-parallel 4 \
-  --sa
+sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf -r 106 -C 3619200000 --band 78 --numerology 1 --ue-txgain 0 --ue-rxgain 114 --nokrnmod --dlsch-parallel 4 --sa
 ```
 
 After the UE associates, open another session check the UE IP address.
