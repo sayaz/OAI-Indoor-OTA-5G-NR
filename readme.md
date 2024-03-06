@@ -46,7 +46,19 @@ see when the UE syncs with the network.
 sudo docker logs -f oai-amf
 ```
 
-On `nodeb`:
+If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf` and edit line `48`, `49`, `51` and `71`.
+
+You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},`
+
+Once completed, you need to build/compile:
+
+```
+/var/tmp/oairan/cmake_targets/build_oai -I --ninja
+
+/var/tmp/oairan/cmake_targets/build_oai -w USRP --build-lib nrscope --gNB --ninja
+```
+
+Now start `gNB`:
 
 ```
 sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
@@ -54,10 +66,19 @@ sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/bui
 
 On `ue`:
 
+Similarly if you want to make any change in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
+
+```
+/var/tmp/oairan/cmake_targets/build_oai -I --ninja
+
+/var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
+```
+
+
 After you've started the gNodeB, start the UE:
 
 ```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf -r 106 -C 3619200000 --band 78 --numerology 1 --ue-txgain 0 --ue-rxgain 114 --nokrnmod --dlsch-parallel 4 --sa
+sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf -r 106 -C 5754720000 --band 46 --numerology 1 --ue-txgain 0 --ue-rxgain 114 --nokrnmod --dlsch-parallel 4 --sa
 ```
 
 After the UE associates, open another session check the UE IP address.
