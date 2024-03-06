@@ -102,6 +102,15 @@ ping 192.168.70.135
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
+Additional for debuggin:
+- If you want to see the spectrum you can use any of the below commands:
+```
+/usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 114
+```
+For GUI (you need X11 forwarding activated)
+```
+/usr/bin/uhd_fft --f 5754.72e6 --rate 40e6
+```
 
 Known Issues and Workarounds:
 
