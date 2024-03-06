@@ -23,14 +23,7 @@ After all startup scripts have finished...
 
 On `cn`:
 
-If you'd like to monitor traffic between the various network functions and the
-gNodeB, start tshark in a session:
-
-```
-sudo tshark -i demo-oai -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com"
-```
-
-In another session, start the 5G core network services. It will take several
+Start the 5G core network services. It will take several
 seconds for the services to start up. Make sure the script indicates that the
 services are healthy before moving on.
 
@@ -102,15 +95,36 @@ ping 192.168.70.135
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
-Additional for debuggin:
-- If you want to see the spectrum you can use any of the below commands:
+Additional commands for debuggin:
+- If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
 ```
 /usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 114
 ```
+
 For GUI (you need X11 forwarding activated)
 ```
 /usr/bin/uhd_fft --f 5754.72e6 --rate 40e6
 ```
+
+
+Start trace on CN
+
+```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
+
+
+iperf test (Client (UE) to CN)
+
+CN : `sudo docker exec -it oai-ext-dn iperf3 -s`
+UE : `iperf3 -c 192.168.70.135 -t 10`
+
+
+iperf test (CN to UE (DL))
+
+First find IP address of UE : ifconfig oaitun_ue1
+
+CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
+UE : `iperf3 -s`
+
 
 Known Issues and Workarounds:
 
