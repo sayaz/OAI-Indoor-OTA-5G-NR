@@ -13,32 +13,11 @@ Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/
 
 The following will be deployed:
 
-- Server-class compute node (d430) with a Docker-based OAI 5G Core Network
-- Server-class compute node (d740) with OAI 5G gNodeB (fiber connection to 5GCN and an X310)
-- OAI 5G nrUE
-
-Note: This profile currently requires the use of the 3550-3600 MHz spectrum
-range and you need an approved reservation for this spectrum in order to use it.
-It's also strongly recommended that you include the following necessary
-resources in your reservation to gaurantee their availability at the time of
-your experiment:
-
 - A d430 compute node to host the core network
 - A d740 compute node for the gNodeB
 - One of the four indoor OTA X310s
-- One of the four indoor OTA x310s as UE
-
-#### Bleeding-edge Software Caveats!
-
-You may see warnings, errors, crashes, etc, when running the OAI gNodeB soft
-modem. The COTS modules may sometimes fail to attach. Please subscribe to the
-OAI user or developer mailing lists to monitor and ask questions about the
-current status of OAI 5G:
-https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/MailingList.
-
-Startup scripts will still be running when your experiment becomes ready.
-Watch the "Startup" column on the "List View" tab for your experiment and wait
-until all of the compute nodes show "Finished" before proceeding.
+- One of the four indoor OTA B210 as UE
+- NUC compute node for UE
 
 After all startup scripts have finished...
 
