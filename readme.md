@@ -21,7 +21,7 @@ The following will be deployed:
 
 After all startup scripts have finished...
 
-On `cn`:
+**Core Network**
 
 Start the 5G core network services. It will take several
 seconds for the services to start up. Make sure the script indicates that the
@@ -39,6 +39,8 @@ see when the UE syncs with the network.
 sudo docker logs -f oai-amf
 ```
 
+**gNB**
+
 If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf` and edit line `48`, `49`, `51` and `71`.
 
 You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},`
@@ -51,13 +53,13 @@ Once completed, you need to build/compile:
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --build-lib nrscope --gNB --ninja
 ```
 
-Now start `gNB`:
+Now start the gNB:
 
 ```
 sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
 
-On `ue`:
+**UE**
 
 Similarly if you want to make any change in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
 
@@ -67,14 +69,13 @@ Similarly if you want to make any change in the frequency edit the file `/var/tm
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
 ```
 
-
-After you've started the gNodeB, start the UE:
+Start UE:
 
 ```
 sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf -r 106 -C 5754720000 --band 46 --numerology 1 --ue-txgain 0 --ue-rxgain 114 --nokrnmod --dlsch-parallel 4 --sa
 ```
 
-After the UE associates, open another session check the UE IP address.
+**After the UE associates, open another session check the UE IP address.**
 
 Check UE IP address
 ```
@@ -95,7 +96,7 @@ ping 192.168.70.135
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
-Additional commands for debuggin:
+**Additional commands for debuggin**
 - If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
 ```
 /usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 114
