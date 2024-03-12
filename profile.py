@@ -207,11 +207,11 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 
-def b210_nuc_pair_gnb(idx, b210_radio):
+def b210_nuc_pair_gnb(idx, b210_radio_gnb):
     role = "nodeb"
-    gnb = request.RawPC("{}-gnb-comp".format(b210_radio))
+    gnb = request.RawPC("{}-gnb-comp".format(b210_radio_gnb))
     gnb.component_manager_id = COMP_MANAGER_ID
-    gnb.component_id = b210_radio
+    gnb.component_id = b210_radio_gnb
     gnb.hardware_type = params.sdr_nodetype # d430
 
     nodeb_cn_if = gnb.addInterface("nodeb-cn-if")
@@ -335,11 +335,11 @@ indoor_ota_b210s = [
 
 
 pc.defineParameter(
-    name="x310_radio",
-    description="X310 Radio (for OAI gNodeB)",
+    name="b210_radio_gnb",
+    description="B210 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_x310s[0],
-    legalValues=indoor_ota_x310s
+    defaultValue=indoor_ota_b210s[1],
+    legalValues=indoor_ota_b210s
 )
 
 pc.defineParameter(
@@ -407,7 +407,7 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single x310 for gNB and UE for now
-b210_nuc_pair_gnb(0, params.b210_radio)
+b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
 b210_nuc_pair_ue(0, params.b210_radio)
