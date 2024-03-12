@@ -206,40 +206,7 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
-
-def b210_nuc_pair_gnb(idx, b210_radio):
-    role = "nodeb"
-    ue = request.RawPC("{}-gnb-comp".format(b210_radio))
-    ue.component_manager_id = COMP_MANAGER_ID
-    ue.component_id = b210_radio
-    ue.hardware_type = params.sdr_nodetype # d430
-
-    if params.sdr_compute_image:
-        ue.disk_image = params.sdr_compute_image
-    else:
-        ue.disk_image = UBUNTU_IMG
-
-    if params.oai_ran_commit_hash:
-        oai_ran_hash = params.oai_ran_commit_hash
-    else:
-        oai_ran_hash = DEFAULT_NR_RAN_HASH
-
-    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-
-    cmd ="chmod +x /local/repository/bin/common.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-
-    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-
-    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
-
-
-def b210_nuc_pair_ue(idx, b210_radio):
+def b210_nuc_pair(idx, b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
@@ -403,10 +370,11 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single x310 for gNB and UE for now
-b210_node_pair_gnb(0, params.b210_radio)
+x310_node_pair(0, params.x310_radio)
+# UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 # Single b210 for UE
-b210_nuc_pair_ue(0, params.b210_radio)
+b210_nuc_pair(0, params.b210_radio)
 
 
 for frange in params.freq_ranges:
