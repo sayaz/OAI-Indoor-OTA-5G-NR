@@ -219,9 +219,9 @@ def b210_nuc_pair_gnb(idx, b210_radio):
     cn_link.addInterface(nodeb_cn_if)
 
     if params.sdr_compute_image:
-        ue.disk_image = params.sdr_compute_image
+        gnb.disk_image = params.sdr_compute_image
     else:
-        ue.disk_image = UBUNTU_IMG
+        gnb.disk_image = UBUNTU_IMG
 
     if params.oai_ran_commit_hash:
         oai_ran_hash = params.oai_ran_commit_hash
