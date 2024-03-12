@@ -209,10 +209,14 @@ def x310_node_pair(idx, x310_radio):
 
 def b210_nuc_pair_gnb(idx, b210_radio):
     role = "nodeb"
-    ue = request.RawPC("{}-gnb-comp".format(b210_radio))
-    ue.component_manager_id = COMP_MANAGER_ID
-    ue.component_id = b210_radio
-    ue.hardware_type = params.sdr_nodetype # d430
+    gnb = request.RawPC("{}-gnb-comp".format(b210_radio))
+    gnb.component_manager_id = COMP_MANAGER_ID
+    gnb.component_id = b210_radio
+    gnb.hardware_type = params.sdr_nodetype # d430
+
+    nodeb_cn_if = gnb.addInterface("nodeb-cn-if")
+    nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
+    cn_link.addInterface(nodeb_cn_if)
 
     if params.sdr_compute_image:
         ue.disk_image = params.sdr_compute_image
@@ -225,16 +229,16 @@ def b210_nuc_pair_gnb(idx, b210_radio):
         oai_ran_hash = DEFAULT_NR_RAN_HASH
 
     cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
     cmd ="chmod +x /local/repository/bin/common.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
     cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
     cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
     # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
     # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
@@ -349,7 +353,7 @@ pc.defineParameter(
 
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
-    defaultValue=[{"freq_min": 5734.0, "freq_max": 5774.0}],
+    defaultValue=[{"freq_min": 5730.0, "freq_max": 5770.0}],
     multiValue=True,
     min=0,
     multiValueTitle="Frequency ranges to be used for transmission.",
