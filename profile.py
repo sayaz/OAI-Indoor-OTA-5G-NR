@@ -158,38 +158,38 @@ OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
 
 
 def b210_nuc_pair_gnb(idx, b210_radio_gnb, role):
-    ue = request.RawPC("{}-gnb-comp".format(b210_radio_gnb))
-    ue.component_manager_id = COMP_MANAGER_ID
-    ue.component_id = b210_radio_gnb
-    ue.hardware_type = params.sdr_nodetype # d430
+    gnb = request.RawPC("{}-gnb-comp".format(b210_radio_gnb))
+    gnb.component_manager_id = COMP_MANAGER_ID
+    gnb.component_id = b210_radio_gnb
+    gnb.hardware_type = params.sdr_nodetype # d430
 
     if params.sdr_compute_image:
-        ue.disk_image = params.sdr_compute_image
+        gnb.disk_image = params.sdr_compute_image
     else:
-        ue.disk_image = UBUNTU_IMG
-
-    if params.oai_ran_commit_hash:
-        oai_ran_hash = params.oai_ran_commit_hash
-    else:
-        oai_ran_hash = DEFAULT_NR_RAN_HASH
+        gnb.disk_image = UBUNTU_IMG
 
     nodeb_cn_if = node.addInterface("nodeb-cn-if")
     nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
     cn_link.addInterface(nodeb_cn_if)
 
     cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
     cmd ="chmod +x /local/repository/bin/common.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
     cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
 
     cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-    ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+    gnb.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    gnb.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 def b210_nuc_pair_ue(idx, b210_radio_ue, role):
     ue = request.RawPC("{}-ue-comp".format(b210_radio_ue))
