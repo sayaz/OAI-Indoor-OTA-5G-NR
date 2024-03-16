@@ -206,7 +206,8 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
-def b210_nuc_pair(idx, b210_radio, role):
+def b210_nuc_pair(idx, b210_radio):
+    role = "ue"
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
     ue.component_id = b210_radio
@@ -233,8 +234,8 @@ def b210_nuc_pair(idx, b210_radio, role):
 
     cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
     ue.addService(rspec.Execute(shell="bash", command=cmd))
-    ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 pc = portal.Context()
 
@@ -292,7 +293,7 @@ indoor_ota_x310s = [
 
 indoor_ota_b210s = [
     ("ota-nuc1", "UE # 1"),
-    ("ota-nuc3", "UE # 2"),
+    ("ota-nuc4", "UE # 2"),
 ]
 
 
@@ -369,12 +370,11 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single x310 for gNB and UE for now
-# x310_node_pair(0, params.x310_radio)
+x310_node_pair(0, params.x310_radio)
 # UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 # Single b210 for UE
-b210_nuc_pair(0, params.b210_radio, role="gNB")
-b210_nuc_pair(1, params.b210_radio, role="ue")
+b210_nuc_pair(0, params.b210_radio)
 
 
 for frange in params.freq_ranges:
