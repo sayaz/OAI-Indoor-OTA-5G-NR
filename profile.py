@@ -269,7 +269,7 @@ pc.defineParameter(
 )
 
 indoor_ota_b210s = [
-    ("ota-nuc1", "UE # 1"),
+    ("ota-nuc1", "gNB"),
     ("ota-nuc3", "UE # 2"),
 ]
 
@@ -293,7 +293,7 @@ pc.defineParameter(
 
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
-    defaultValue=[{"freq_min": 5734.0, "freq_max": 5774.0}],
+    defaultValue=[{"freq_min": 3552.0, "freq_max": 3592.0}],
     multiValue=True,
     min=0,
     multiValueTitle="Frequency ranges to be used for transmission.",
