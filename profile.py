@@ -173,6 +173,10 @@ def b210_nuc_pair_gnb(idx, b210_radio_gnb, role):
     else:
         oai_ran_hash = DEFAULT_NR_RAN_HASH
 
+    nodeb_cn_if = node.addInterface("nodeb-cn-if")
+    nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
+    cn_link.addInterface(nodeb_cn_if)
+
     cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
     ue.addService(rspec.Execute(shell="bash", command=cmd))
 
