@@ -206,6 +206,36 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
+def b210_nuc_pair_gnb(idx, b210_radio_gnb, role):
+    ue = request.RawPC("{}-ue-comp".format(b210_radio_gnb))
+    ue.component_manager_id = COMP_MANAGER_ID
+    ue.component_id = b210_radio_gnb
+    ue.hardware_type = params.sdr_nodetype # d430
+
+    if params.sdr_compute_image:
+        ue.disk_image = params.sdr_compute_image
+    else:
+        ue.disk_image = UBUNTU_IMG
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
+
+    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/common.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
 def b210_nuc_pair(idx, b210_radio, role):
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
@@ -312,6 +342,14 @@ pc.defineParameter(
     legalValues=indoor_ota_b210s
 )
 
+pc.defineParameter(
+    name="b210_radio_gnb",
+    description="b210 Radio (for OAI gnb)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_b210s[0],
+    legalValues=indoor_ota_b210s
+)
+
 
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
@@ -373,7 +411,7 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 # UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 # Single b210 for UE
-b210_nuc_pair(0, params.b210_radio, role="gNB")
+b210_nuc_pair_gnb(0, params.b210_radio_gnb, role="gNB")
 b210_nuc_pair(1, params.b210_radio, role="ue")
 
 
