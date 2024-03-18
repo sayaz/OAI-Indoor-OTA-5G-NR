@@ -56,7 +56,7 @@ Once completed, you need to build/compile:
 Now start the gNB:
 
 ```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
+sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
 
 **UE**
@@ -72,7 +72,7 @@ Similarly if you want to make any change in the frequency edit the file `/var/tm
 Start UE:
 
 ```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf -r 106 -C 5754720000 --band 46 --numerology 1 --ue-txgain 0 --ue-rxgain 114 --nokrnmod --dlsch-parallel 4 --sa
+sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E   -O /var/tmp/etc/oai/ue.conf   -r 106   -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa
 ```
 
 **After the UE associates, open another session check the UE IP address.**
@@ -99,7 +99,7 @@ sudo docker exec -it oai-ext-dn ping <UE IP address>
 **Additional commands for debuggin**
 - If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
 ```
-/usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 114
+/usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 80 --frame-rate 70 --bw 50e6
 ```
 
 For GUI (you need X11 forwarding activated)
@@ -127,22 +127,6 @@ CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
 UE : `iperf3 -s`
 
 
-Known Issues and Workarounds:
 
-- The oai-amf may not list all registered UEs in the assoicated log.
-- The gNodeB soft modem may spam warnings/errors about missed DCI or ULSCH
-  detections. It may crash unexpectedly.
-- Exiting the gNodeB soft modem with ctrl-c will often leave the SDR in a funny
-  state, so that the next time you start it, it may crash with a UHD error. If
-  this happens, simply start it again.
-- The module may not attach to the network or pick up an IP address on the first
-  try. If so, put the module into airplane mode with `sudo sh -c "chat -t 1 -sv ''
-  AT OK 'AT+CFUN=4' OK < /dev/ttyUSB2 > /dev/ttyUSB2"`, kill and restart
-  quectel-CM, then bring the module back online. If the module still fails to
-  associate and/or pick up an IP, try putting the module into airplane mode,
-  rebooting the associated NUC, and bringing the module back online again.
-- `chat` may return an error sometimes. If so, just run the command again.
-
-"""
 
 
