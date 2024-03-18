@@ -256,7 +256,6 @@ pc = portal.Context()
 
 node_types = [
     ("d430", "Emulab, d430"),
-    ("d710", "Emulab, d710"),
     ("d740", "Emulab, d740"),
 ]
 
@@ -264,7 +263,7 @@ pc.defineParameter(
     name="sdr_nodetype",
     description="Type of compute node paired with the SDRs",
     typ=portal.ParameterType.STRING,
-    defaultValue=node_types[1],
+    defaultValue=node_types[0],
     legalValues=node_types
 )
 
@@ -272,7 +271,7 @@ pc.defineParameter(
     name="cn_nodetype",
     description="Type of compute node to use for CN node (if included)",
     typ=portal.ParameterType.STRING,
-    defaultValue=node_types[0],
+    defaultValue=node_types[1],
     legalValues=node_types
 )
 
