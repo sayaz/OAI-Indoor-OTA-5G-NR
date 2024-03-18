@@ -256,6 +256,7 @@ pc = portal.Context()
 
 node_types = [
     ("d430", "Emulab, d430"),
+    ("d710", "Emulab, d710"),
     ("d740", "Emulab, d740"),
 ]
 
