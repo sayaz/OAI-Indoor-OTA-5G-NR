@@ -206,51 +206,73 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
-def UE_node_x310(idx, x310_radio):
-	role = "ue"
-	ue = request.RawPC("{}-ue-comp".format(x310_radio))
-	ue.component_manager_id = COMP_MANAGER_ID
-	ue.hardware_type = params.sdr_nodetype
 
-	if params.sdr_compute_image:
-		ue.disk_image = params.sdr_compute_image
-	else:
-		ue.disk_image = UBUNTU_IMG
+def b210_nuc_pair_gnb(idx, b210_radio_gnb):
+    role = "nodeb"
+    gnb = request.RawPC("{}-gnb-comp".format(b210_radio_gnb))
+    gnb.component_manager_id = COMP_MANAGER_ID
+    gnb.component_id = b210_radio_gnb
+    gnb.hardware_type = params.sdr_nodetype # d430
 
-	ue_radio_if = ue.addInterface("ue-usrp-if")
-	ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
+    nodeb_cn_if = gnb.addInterface("nodeb-cn-if")
+    nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
+    cn_link.addInterface(nodeb_cn_if)
 
-	radio_link = request.Link("radio-link-{}".format(idx))
-	radio_link.bandwidth = 10*1000*1000
-	radio_link.addInterface(ue_radio_if)
+    if params.sdr_compute_image:
+        gnb.disk_image = params.sdr_compute_image
+    else:
+        gnb.disk_image = UBUNTU_IMG
 
-	radio = request.RawPC("{}-ue-sdr".format(x310_radio))
-	radio.component_id = x310_radio
-	radio.component_manager_id = COMP_MANAGER_ID
-	radio_link.addNode(radio)
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
 
-	if params.oai_ran_commit_hash:
-		oai_ran_hash = params.oai_ran_commit_hash
-	else:
-		oai_ran_hash = DEFAULT_NR_RAN_HASH
+    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
-	cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-	ue.addService(rspec.Execute(shell="bash", command=cmd))
+    cmd ="chmod +x /local/repository/bin/common.sh"
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
-	cmd ="chmod +x /local/repository/bin/common.sh"
-	ue.addService(rspec.Execute(shell="bash", command=cmd))
+    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
 
-	cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-	ue.addService(rspec.Execute(shell="bash", command=cmd))
+    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
-	cmd ="chmod +x /local/repository/bin/tune-sdr-iface.sh"
-	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
-	cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-	ue.addService(rspec.Execute(shell="bash", command=cmd))
-	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+def b210_nuc_pair_ue(idx, b210_radio):
+    role = "ue"
+    ue = request.RawPC("{}-ue-comp".format(b210_radio))
+    ue.component_manager_id = COMP_MANAGER_ID
+    ue.component_id = b210_radio
+    ue.hardware_type = params.sdr_nodetype # d430
 
+    if params.sdr_compute_image:
+        ue.disk_image = params.sdr_compute_image
+    else:
+        ue.disk_image = UBUNTU_IMG
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
+
+    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/common.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    ue.addService(rspec.Execute(shell="bash", command=cmd))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 pc = portal.Context()
 
@@ -302,30 +324,36 @@ pc.defineParameter(
 indoor_ota_x310s = [
     ("ota-x310-1",
      "USRP X310 #1"),
-    ("ota-x310-3",
+    ("ota-x310-2",
      "USRP X310 #2"),
 ]
 
+indoor_ota_b210s = [
+    ("ota-nuc1", "UE # 1"),
+    ("ota-nuc4", "UE # 2"),
+]
+
+
 pc.defineParameter(
-    name="x310_radio",
-    description="X310 Radio (for OAI gNodeB)",
+    name="b210_radio_gnb",
+    description="B210 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_x310s[1],
-    legalValues=indoor_ota_x310s
+    defaultValue=indoor_ota_b210s[1],
+    legalValues=indoor_ota_b210s
 )
 
 pc.defineParameter(
-    name="x310_radio_UE",
-    description="X310 Radio (for OAI UE)",
+    name="b210_radio",
+    description="b210 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_x310s[0],
-    legalValues=indoor_ota_x310s
+    defaultValue=indoor_ota_b210s[0],
+    legalValues=indoor_ota_b210s
 )
 
 
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
-    defaultValue=[{"freq_min": 5734.0, "freq_max": 5774.0}],
+    defaultValue=[{"freq_min": 5730.0, "freq_max": 5770.0}],
     multiValue=True,
     min=0,
     multiValueTitle="Frequency ranges to be used for transmission.",
@@ -359,7 +387,7 @@ cn_node.disk_image = UBUNTU_IMG
 cn_if = cn_node.addInterface("cn-if")
 cn_if.addAddress(rspec.IPv4Address("192.168.1.1", "255.255.255.0"))
 cn_link = request.Link("cn-link")
-cn_link.bandwidth = 10*1000*1000
+# cn_link.bandwidth = 10*1000*1000
 cn_link.addInterface(cn_if)
 
 if params.oai_cn_commit_hash:
@@ -379,8 +407,10 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single x310 for gNB and UE for now
-x310_node_pair(0, params.x310_radio)
-UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
+b210_nuc_pair_gnb(0, params.b210_radio_gnb)
+
+# Single b210 for UE
+b210_nuc_pair_ue(0, params.b210_radio)
 
 
 for frange in params.freq_ranges:
