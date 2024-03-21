@@ -104,7 +104,12 @@ sudo docker exec -it oai-ext-dn ping <UE IP address>
 
 For GUI (you need X11 forwarding activated)
 ```
-/usr/bin/uhd_fft --f 5754.72e6 --rate 40e6
+/usr/bin/uhd_fft -f 5754.72e6 -s 40e6 -g 76
+```
+If error exist related to platform plugin, exit and
+```
+export DISPLAY=:0
+ssh -X sayazm@ota-nuc1.emulab.net
 ```
 
 
