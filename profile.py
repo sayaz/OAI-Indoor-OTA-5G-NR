@@ -13,28 +13,18 @@ tourDescription = """
 ### OAI 5G using the POWDER Indoor OTA Lab
 
 This profile instantiates an experiment for testing OAI 5G with SDR-UEs in
-standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
+standalone mode (SA) using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
 - 1x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
   TX/RX and RX2 ports on this channel are connected to broadband antennas. The
   SDRs are connected via fiber to near-edge compute resources.
-- 1x NI X310 SDR for nrUE with a compute node
+- 1x NI B210 SDR for nrUE with a compute node
 
 You can find a diagram of the lab layout here: [OTA Lab
 Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
 
 The following will be deployed:
-
-- Server-class compute node (d430) with a Docker-based OAI 5G Core Network
-- Server-class compute node (d740) with OAI 5G gNodeB (fiber connection to 5GCN and an X310)
-- OAI 5G nrUE
-
-Note: This profile currently requires the use of the 3550-3600 MHz spectrum
-range and you need an approved reservation for this spectrum in order to use it.
-It's also strongly recommended that you include the following necessary
-resources in your reservation to gaurantee their availability at the time of
-your experiment:
 
 - 2 x d430 compute node to host the core network and UE
 - 1 x d740 compute node for the gNodeB
@@ -51,17 +41,7 @@ until all of the compute nodes show "Finished" before proceeding.
 
 After all startup scripts have finished...
 
-On `cn`:
-
-If you'd like to monitor traffic between the various network functions and the
-gNodeB, start tshark in a session:
-
-```
-sudo tshark -i demo-oai \
-  -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com"
-```
-
-In another session, start the 5G core network services. It will take several
+On `cn`, start the 5G core network services. It will take several
 seconds for the services to start up. Make sure the script indicates that the
 services are healthy before moving on.
 
@@ -70,14 +50,14 @@ cd /var/tmp/oai-cn5g-fed/docker-compose
 sudo python3 ./core-network.py --type start-mini --scenario 1
 ```
 
-In yet another session, start following the logs for the AMF. This way you can
+In another session, start following the logs for the AMF. This way you can
 see when the UE syncs with the network.
 
 ```
 sudo docker logs -f oai-amf
 ```
 
-On `nodeb`:
+On `gNB` if using `band 78` with `PRB 106` :
 
 ```
 sudo numactl --membind=0 --cpubind=0 \
@@ -85,33 +65,43 @@ sudo numactl --membind=0 --cpubind=0 \
   -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa \
   --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
+If using `band 46` with PRB `51`
+```
+sudo numactl --membind=0 --cpubind=0 \
+  /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E \
+  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.51PRB.usrpx310.conf --sa \
+  --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
+```
 
 On `ue`:
 
-After you've started the gNodeB, start the UE:
+After you've started the gNodeB, start the UE (include -E for some other bands):
 
 ```
 sudo numactl --membind=0 --cpubind=0 \
-  /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E \
+  /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem\
   -O /var/tmp/etc/oai/ue.conf \
-  -r 106 \
-  -C 3619200000 \
+  -r 51 \
+  -C 5754720000 \
+  --ssb 186
   --usrp-args "clock_source=external,type=x300" \
-  --band 78 \
+  --band 46 \
   --numerology 1 \
   --ue-txgain 0 \
-  --ue-rxgain 104 \
+  --ue-rxgain 114 \
   --nokrnmod \
   --dlsch-parallel 4 \
   --sa
 ```
 
-After the UE associates, open another session check the UE IP address.
+**After the UE associates, open another session check the UE IP address.**
 
-# check UE IP address
+Check UE IP address
+```
 ifconfig oaitun_ue1
-
-# add a route toward the CN traffic gen node
+```
+Add a route toward the CN traffic gen node
+```
 sudo ip route add 192.168.70.0/24 dev oaitun_ue1
 ```
 
@@ -125,22 +115,40 @@ ping 192.168.70.135
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
+**Additional commands for debuggin**
+- If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
+```
+/usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 80 --frame-rate 70 --bw 50e6
+```
 
-Known Issues and Workarounds:
+For GUI (you need X11 forwarding activated)
+```
+/usr/bin/uhd_fft -f 5754.72e6 -s 40e6 -g 76
+```
+If error exist related to platform plugin, exit and
+```
+export DISPLAY=:0
+ssh -X sayazm@ota-nuc1.emulab.net
+```
 
-- The oai-amf may not list all registered UEs in the assoicated log.
-- The gNodeB soft modem may spam warnings/errors about missed DCI or ULSCH
-  detections. It may crash unexpectedly.
-- Exiting the gNodeB soft modem with ctrl-c will often leave the SDR in a funny
-  state, so that the next time you start it, it may crash with a UHD error. If
-  this happens, simply start it again.
-- The module may not attach to the network or pick up an IP address on the first
-  try. If so, put the module into airplane mode with `sudo sh -c "chat -t 1 -sv ''
-  AT OK 'AT+CFUN=4' OK < /dev/ttyUSB2 > /dev/ttyUSB2"`, kill and restart
-  quectel-CM, then bring the module back online. If the module still fails to
-  associate and/or pick up an IP, try putting the module into airplane mode,
-  rebooting the associated NUC, and bringing the module back online again.
-- `chat` may return an error sometimes. If so, just run the command again.
+
+Start trace on CN
+
+```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
+
+
+iperf test (Client (UE) to CN)
+
+CN : `sudo docker exec -it oai-ext-dn iperf3 -s`
+UE : `iperf3 -c 192.168.70.135 -t 10`
+
+
+iperf test (CN to UE (DL))
+
+First find IP address of UE : ifconfig oaitun_ue1
+
+CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
+UE : `iperf3 -s`
 
 """
 
