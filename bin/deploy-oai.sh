@@ -125,7 +125,8 @@ function setup_ran_node {
     cd $SRCDIR
     git clone $OAI_RAN_MIRROR oairan
     cd oairan
-    git checkout develop
+    #git checkout develop
+    git checkout $COMMIT_HASH
 
     source oaienv
     cd cmake_targets
