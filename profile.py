@@ -26,10 +26,9 @@ Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/
 
 The following will be deployed:
 
-- 2 x d430 compute node to host the core network and UE
+- 1 x d740 compute node to host the core network and UE
 - 1 x d740 compute node for the gNodeB
-- One of the four indoor OTA X310s for gNB
-- One of the four indoor OTA x310s for UE
+- 1 x NUC with B210 USRP for UE
 
 """
 
