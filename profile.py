@@ -16,23 +16,52 @@ This profile instantiates an experiment for testing OAI 5G with SDR-UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
+- 1x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
+  TX/RX and RX2 ports on this channel are connected to broadband antennas. The
+  SDRs are connected via fiber to near-edge compute resources.
+- 1x NI X310 SDR for nrUE with a compute node
+
+You can find a diagram of the lab layout here: [OTA Lab
+Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
+
 The following will be deployed:
+
+- Server-class compute node (d430) with a Docker-based OAI 5G Core Network
+- Server-class compute node (d740) with OAI 5G gNodeB (fiber connection to 5GCN and an X310)
+- OAI 5G nrUE
+
+Note: This profile currently requires the use of the 3550-3600 MHz spectrum
+range and you need an approved reservation for this spectrum in order to use it.
+It's also strongly recommended that you include the following necessary
+resources in your reservation to gaurantee their availability at the time of
+your experiment:
 
 - 2 x d430 compute node to host the core network and UE
 - 1 x d740 compute node for the gNodeB
 - One of the four indoor OTA X310s for gNB
 - One of the four indoor OTA x310s for UE
 
-You can find a diagram of the lab layout here: [OTA Lab
-Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
-
 """
 
 tourInstructions = """
+
+Startup scripts will still be running when your experiment becomes ready.
+Watch the "Startup" column on the "List View" tab for your experiment and wait
+until all of the compute nodes show "Finished" before proceeding.
+
 After all startup scripts have finished...
 
 On `cn`:
-Start the 5G core network services. It will take several
+
+If you'd like to monitor traffic between the various network functions and the
+gNodeB, start tshark in a session:
+
+```
+sudo tshark -i demo-oai \
+  -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com"
+```
+
+In another session, start the 5G core network services. It will take several
 seconds for the services to start up. Make sure the script indicates that the
 services are healthy before moving on.
 
@@ -177,7 +206,44 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
-def b210_nuc_pair(idx, b210_radio):
+
+def b210_nuc_pair_gnb(idx, b210_radio_gnb):
+    role = "nodeb"
+    gnb = request.RawPC("{}-gnb-comp".format(b210_radio_gnb))
+    gnb.component_manager_id = COMP_MANAGER_ID
+    gnb.component_id = b210_radio_gnb
+    gnb.hardware_type = params.sdr_nodetype # d430
+
+    nodeb_cn_if = gnb.addInterface("nodeb-cn-if")
+    nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
+    cn_link.addInterface(nodeb_cn_if)
+
+    if params.sdr_compute_image:
+        gnb.disk_image = params.sdr_compute_image
+    else:
+        gnb.disk_image = UBUNTU_IMG
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
+
+    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/common.sh"
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+
+
+def b210_nuc_pair_ue(idx, b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
@@ -258,22 +324,22 @@ pc.defineParameter(
 indoor_ota_x310s = [
     ("ota-x310-1",
      "USRP X310 #1"),
-    ("ota-x310-2",
+    ("ota-x310-3",
      "USRP X310 #2"),
 ]
 
 indoor_ota_b210s = [
     ("ota-nuc1", "UE # 1"),
-    ("ota-nuc4", "UE # 2"),
+    ("ota-nuc3", "UE # 2"),
 ]
 
 
 pc.defineParameter(
-    name="x310_radio",
-    description="X310 Radio (for OAI gNodeB)",
+    name="b210_radio_gnb",
+    description="B210 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_x310s[0],
-    legalValues=indoor_ota_x310s
+    defaultValue=indoor_ota_b210s[1],
+    legalValues=indoor_ota_b210s
 )
 
 pc.defineParameter(
@@ -321,7 +387,7 @@ cn_node.disk_image = UBUNTU_IMG
 cn_if = cn_node.addInterface("cn-if")
 cn_if.addAddress(rspec.IPv4Address("192.168.1.1", "255.255.255.0"))
 cn_link = request.Link("cn-link")
-cn_link.bandwidth = 10*1000*1000
+# cn_link.bandwidth = 10*1000*1000
 cn_link.addInterface(cn_if)
 
 if params.oai_cn_commit_hash:
@@ -341,11 +407,10 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single x310 for gNB and UE for now
-x310_node_pair(0, params.x310_radio)
-# UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
+b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
-b210_nuc_pair(0, params.b210_radio)
+b210_nuc_pair_ue(0, params.b210_radio)
 
 
 for frange in params.freq_ranges:
