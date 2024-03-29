@@ -329,7 +329,7 @@ indoor_ota_x310s = [
 ]
 
 indoor_ota_b210s = [
-    ("ota-nuc1", "UE # 1"),
+    ("ota-nuc4", "UE # 1"),
     ("ota-nuc3", "UE # 2"),
 ]
 
