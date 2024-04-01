@@ -132,7 +132,7 @@ CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
 UE : `iperf3 -s`
 
 
-##How to take MAC layer Wireshark trace##
+## How to take MAC layer Wireshark trace ##
 
 Simply call ```build_oai``` the usual way, for example ```./build_oai --eNB -w USRP```. The T tracer is compiled in by default.
 
