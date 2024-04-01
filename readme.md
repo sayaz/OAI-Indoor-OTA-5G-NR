@@ -141,7 +141,7 @@ CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
 UE : `iperf3 -s`
 
 
-## How to take MAC layer Wireshark trace ##
+### How to take MAC layer Wireshark trace ###
 
 Simply call ```build_oai``` the usual way, for example ```./build_oai --eNB -w USRP```. The T tracer is compiled in by default.
 
@@ -170,7 +170,7 @@ Browse to ```/var/tmp/oairan/common/utils/T/tracer/``` and run
 ```
 
 
-# Configure Wireshark for 5G-NR ##
+## Configure Wireshark for 5G-NR ##
 Use a recent version of wireshark. The steps below were done using version 3.3.2. Maybe some options are different for your version of wireshark. Adapt as necessary.
 
 In the menu, choose ```Edit->Preferences```. In the preference window, unroll ```Protocols```.
