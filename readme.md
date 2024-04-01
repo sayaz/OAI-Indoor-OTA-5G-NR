@@ -60,7 +60,7 @@ For ```PRB = 51```, ```SCS = 30``` KHz and ```band = n46```:
 sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.51PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28
 ```
 
-**UE**
+## UE ##
 
 Similarly if you want to make any change in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
 
@@ -70,11 +70,17 @@ Similarly if you want to make any change in the frequency edit the file `/var/tm
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
 ```
 
-Start UE:
-
+**Start the UE**:
+For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 ```
-sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E   -O /var/tmp/etc/oai/ue.conf   -r 106   -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa
+sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf  -r 106  -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa --tune-offset 23040000
 ```
+For ```PRB = 51```, ```SCS = 30 KHz``` and ```band = n46```:
+```
+sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -O /var/tmp/etc/oai/ue.conf  -r 51  -C 5754720000  --ssb 186 --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa
+```
+> [!NOTE]
+> Sometimes the Tx/Rx power gain does not start with the arguments provided, in that case, change the value, run, and then revert back to 120.
 
 **After the UE associates, open another session check the UE IP address.**
 
