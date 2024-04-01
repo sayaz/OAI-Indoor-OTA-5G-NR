@@ -1,4 +1,4 @@
-## OAI 5G using the POWDER Indoor OTA Lab
+# OAI 5G using the POWDER Indoor OTA Lab 
 
 This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
@@ -13,33 +13,28 @@ Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/
 
 The following will be deployed:
 
-- A d430 compute node to host the core network
-- A d740 compute node for the gNodeB
-- One of the four indoor OTA X310s
-- One of the four indoor OTA B210 as UE
-- NUC compute node for UE
+- A d740 compute node for CN
+- Two of the four indoor OTA B210 as UE and gNB
+- NUC compute node for UE and gNB
 
 After all startup scripts have finished...
 
-**Core Network**
+## Core Network ##
 
-Start the 5G core network services. It will take several
-seconds for the services to start up. Make sure the script indicates that the
-services are healthy before moving on.
+Start the 5G core network services. It will take several seconds for the services to start up. Make sure the script indicates that the services are healthy before moving on.
 
 ```
 cd /var/tmp/oai-cn5g-fed/docker-compose
 sudo python3 ./core-network.py --type start-mini --scenario 1
 ```
 
-In yet another session, start following the logs for the AMF. This way you can
-see when the UE syncs with the network.
+In yet another session, start following the logs for the AMF. This way you can see when the UE syncs with the network.
 
 ```
 sudo docker logs -f oai-amf
 ```
 
-**gNB**
+## gNB ##
 
 If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf` and edit line `48`, `49`, `51` and `71`.
 
@@ -53,10 +48,16 @@ Once completed, you need to build/compile:
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --build-lib nrscope --gNB --ninja
 ```
 
-Now start the gNB:
+**Start the gNB** :
 
+For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 ```
-sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
+sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
+```
+
+For ```PRB = 51```, ```SCS = 30``` KHz and ```band = n46```:
+```
+sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.51PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28
 ```
 
 **UE**
