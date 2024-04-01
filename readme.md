@@ -153,6 +153,8 @@ sudo ./lte-softmodem -O [configuration file] --T_stdout 2
 ```
 
 **Then Run Live usage**
+Launch wireshark and listen on the local interface (lo). Set the filter to ```udp.port==9999``` and read below for configuration.
+
 Browse to ```/var/tmp/oairan/common/utils/T/tracer/``` and run
 ```
 ./macpdu2wireshark -d /var/tmp/oairan/common/utils/T/T_messages.txt -live
