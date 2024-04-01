@@ -71,6 +71,7 @@ Similarly if you want to make any change in the frequency edit the file `/var/tm
 ```
 
 **Start the UE**:
+
 For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 ```
 sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf  -r 106  -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa --tune-offset 23040000
@@ -81,6 +82,7 @@ sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/b
 ```
 > [!NOTE]
 > Sometimes the Tx/Rx power gain does not start with the arguments provided, in that case, change the value, run, and then revert back to 120.
+> It is also found that UE does not attach to the CN on first try. In such case either wait for 15-30 sec or restart both gNB and UE
 
 **After the UE associates, open another session check the UE IP address.**
 
@@ -103,7 +105,7 @@ ping 192.168.70.135
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
-**Additional commands for debuggin**
+## Additional commands for debuggin ##
 - If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
 ```
 /usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 80 --frame-rate 70 --bw 50e6
@@ -120,18 +122,18 @@ ssh -X sayazm@ota-nuc1.emulab.net
 ```
 
 
-Start trace on CN
+**Start trace on CN**
 
 ```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
 
 
-iperf test (Client (UE) to CN)
+**iperf test (Client (UE) to CN)**
 
 CN : `sudo docker exec -it oai-ext-dn iperf3 -s`
 UE : `iperf3 -c 192.168.70.135 -t 10`
 
 
-iperf test (CN to UE (DL))
+**iperf test (CN to UE (DL))**
 
 First find IP address of UE : ifconfig oaitun_ue1
 
