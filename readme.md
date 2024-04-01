@@ -161,7 +161,7 @@ Browse to ```/var/tmp/oairan/common/utils/T/tracer/``` and run
 ```
 
 
-##Configure Wireshark for 5G-NR##
+# Configure Wireshark for 5G-NR ##
 Use a recent version of wireshark. The steps below were done using version 3.3.2. Maybe some options are different for your version of wireshark. Adapt as necessary.
 
 In the menu, choose ```Edit->Preferences```. In the preference window, unroll ```Protocols```.
