@@ -82,6 +82,7 @@ sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/b
 ```
 > [!NOTE]
 > Sometimes the Tx/Rx power gain does not start with the arguments provided, in that case, change the value, run, and then revert back to 120.
+
 > It is also found that UE does not attach to the CN on first try. In such case either wait for 15-30 sec or restart both gNB and UE
 
 **After the UE associates, open another session check the UE IP address.**
