@@ -132,6 +132,13 @@ CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
 UE : `iperf3 -s`
 
 
+**How to take MAC layer Wireshark trace**
 
+Simply call ```build_oai``` the usual way, for example ./build_oai --eNB -w USRP. The T tracer is compiled in by default.
 
-
+**Tracer Side**
+Go to the directory common/utils/T/tracer and do make. This will locally
+compile all tracer executables, and place them in common/utils/T/tracer. If
+you wish to keep source and build separate, go to your existing build directory
+(typically cmake_targets/ran_build/build), and do make T_tools (or ninja T_tools). After that, the executables will be in
+<build-dir>/common/utils/T/tracer.
