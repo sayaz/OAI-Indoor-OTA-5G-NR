@@ -386,7 +386,7 @@ indoor_ota_x310s = [
     ("ota-x310-3",
      "USRP X310 #2"),
 ]
-
+#change
 indoor_ota_b210s = [
     ("ota-nuc2", "UE # 1"),
     ("ota-nuc4", "UE # 2"),
