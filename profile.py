@@ -388,8 +388,10 @@ indoor_ota_x310s = [
 ]
 #change
 indoor_ota_b210s = [
-    ("ota-nuc2", "UE # 1"),
-    ("ota-nuc4", "UE # 2"),
+    ("ota-nuc1", "UE # 1"),
+    ("ota-nuc2", "UE # 2"),
+    ("ota-nuc3", "UE # 3"),
+    ("ota-nuc4", "UE # 4"),
 ]
 
 
@@ -470,6 +472,9 @@ b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
 b210_nuc_pair_ue(0, params.b210_radio)
+b210_nuc_pair_ue(1, params.b210_radio)
+b210_nuc_pair_ue(2, params.b210_radio)
+b210_nuc_pair_ue(3, params.b210_radio)
 
 
 for frange in params.freq_ranges:
