@@ -473,17 +473,7 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
-idx = 4
-
-for i in range(idx):
-    b210_nuc_pair_ue(idx, params.b210_radio)
-
-    
-
-# b210_nuc_pair_ue(0, params.b210_radio)
-# b210_nuc_pair_ue(1, params.b210_radio)
-# b210_nuc_pair_ue(2, params.b210_radio)
-# b210_nuc_pair_ue(3, params.b210_radio)
+b210_nuc_pair_ue(2, params.b210_radio)
 
 
 for frange in params.freq_ranges:
