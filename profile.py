@@ -407,7 +407,7 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[idx],
+    defaultValue=indoor_ota_b210s[0],
     legalValues=indoor_ota_b210s
 )
 
@@ -473,10 +473,17 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
-b210_nuc_pair_ue(0, params.b210_radio)
-b210_nuc_pair_ue(1, params.b210_radio)
-b210_nuc_pair_ue(2, params.b210_radio)
-b210_nuc_pair_ue(3, params.b210_radio)
+idx = 4
+
+for i in range(idx):
+    b210_nuc_pair_ue(idx, params.b210_radio)
+
+    
+
+# b210_nuc_pair_ue(0, params.b210_radio)
+# b210_nuc_pair_ue(1, params.b210_radio)
+# b210_nuc_pair_ue(2, params.b210_radio)
+# b210_nuc_pair_ue(3, params.b210_radio)
 
 
 for frange in params.freq_ranges:
