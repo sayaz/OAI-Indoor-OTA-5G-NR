@@ -212,8 +212,8 @@ COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 # old hash from branch bandwidth-testing-abs-sr-bsr-multiple_ue
 #TODO: check if merged to develop or develop now supports multiple UEs
 DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432" # 2023.wk19
-# DEFAULT_NR_CN_HASH = "v1.5.0"
-DEFAULT_NR_CN_HASH = "v2.1.0"
+DEFAULT_NR_CN_HASH = "v1.5.0"
+# DEFAULT_NR_CN_HASH = "v2.1.0"
 OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
 
 
