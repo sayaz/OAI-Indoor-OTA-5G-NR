@@ -92,8 +92,8 @@ function setup_cn_node {
     cd $SRCDIR
     git clone --branch $COMMIT_HASH $OAI_CN5G_REPO oai-cn5g-fed
     cd oai-cn5g-fed
-    # git checkout develop
-    git checkout -f $COMMIT_HASH
+    git checkout develop
+    # git checkout -f $COMMIT_HASH
     ./scripts/syncComponents.sh
     echo cloning and syncing oai-cn5g-fed... done.
 
