@@ -10,104 +10,108 @@ import geni.rspec.emulab.spectrum as spectrum
 
 
 tourDescription = """
-# OAI 5G using the POWDER Indoor OTA Lab 
+### OAI 5G using the POWDER Indoor OTA Lab
 
-This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
+This profile instantiates an experiment for testing OAI 5G with SDR-UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
-- 4x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
+- 1x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
   TX/RX and RX2 ports on this channel are connected to broadband antennas. The
   SDRs are connected via fiber to near-edge compute resources.
+- 1x NI X310 SDR for nrUE with a compute node
 
 You can find a diagram of the lab layout here: [OTA Lab
 Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
 
 The following will be deployed:
 
-- A d740 compute node for CN
-- Two of the four indoor OTA B210 as UE and gNB
-- NUC compute node for UE and gNB
+- Server-class compute node (d430) with a Docker-based OAI 5G Core Network
+- Server-class compute node (d740) with OAI 5G gNodeB (fiber connection to 5GCN and an X310)
+- OAI 5G nrUE
+
+Note: This profile currently requires the use of the 3550-3600 MHz spectrum
+range and you need an approved reservation for this spectrum in order to use it.
+It's also strongly recommended that you include the following necessary
+resources in your reservation to gaurantee their availability at the time of
+your experiment:
+
+- 2 x d430 compute node to host the core network and UE
+- 1 x d740 compute node for the gNodeB
+- One of the four indoor OTA X310s for gNB
+- One of the four indoor OTA x310s for UE
+
 """
 
 tourInstructions = """
 
+Startup scripts will still be running when your experiment becomes ready.
+Watch the "Startup" column on the "List View" tab for your experiment and wait
+until all of the compute nodes show "Finished" before proceeding.
+
 After all startup scripts have finished...
 
-## Core Network ##
+On `cn`:
 
-Start the 5G core network services. It will take several seconds for the services to start up. Make sure the script indicates that the services are healthy before moving on.
+If you'd like to monitor traffic between the various network functions and the
+gNodeB, start tshark in a session:
+
+```
+sudo tshark -i demo-oai \
+  -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com"
+```
+
+In another session, start the 5G core network services. It will take several
+seconds for the services to start up. Make sure the script indicates that the
+services are healthy before moving on.
 
 ```
 cd /var/tmp/oai-cn5g-fed/docker-compose
 sudo python3 ./core-network.py --type start-mini --scenario 1
 ```
 
-In yet another session, start following the logs for the AMF. This way you can see when the UE syncs with the network.
+In yet another session, start following the logs for the AMF. This way you can
+see when the UE syncs with the network.
 
 ```
 sudo docker logs -f oai-amf
 ```
 
-## gNB ##
-
-If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf` and edit line `48`, `49`, `51` and `71`.
-
-You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},`
-
-Once completed, you need to build/compile:
+On `nodeb`:
 
 ```
-/var/tmp/oairan/cmake_targets/build_oai -I --ninja
-
-/var/tmp/oairan/cmake_targets/build_oai -w USRP --build-lib nrscope --gNB --ninja
+sudo numactl --membind=0 --cpubind=0 \
+  /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E \
+  -O /var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf --sa \
+  --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
 
-**Start the gNB** :
+On `ue`:
 
-For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
-```
-
-For ```PRB = 51```, ```SCS = 30``` KHz and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.51PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28
-```
-
-## UE ##
-
-Similarly if you want to make any change in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
+After you've started the gNodeB, start the UE:
 
 ```
-/var/tmp/oairan/cmake_targets/build_oai -I --ninja
-
-/var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
+sudo numactl --membind=0 --cpubind=0 \
+  /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E \
+  -O /var/tmp/etc/oai/ue.conf \
+  -r 106 \
+  -C 3619200000 \
+  --usrp-args "clock_source=external,type=x300" \
+  --band 78 \
+  --numerology 1 \
+  --ue-txgain 0 \
+  --ue-rxgain 104 \
+  --nokrnmod \
+  --dlsch-parallel 4 \
+  --sa
 ```
 
-**Start the UE**:
+After the UE associates, open another session check the UE IP address.
 
-For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf  -r 106  -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa --tune-offset 23040000
-```
-For ```PRB = 51```, ```SCS = 30 KHz``` and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -O /var/tmp/etc/oai/ue.conf  -r 51  -C 5754720000  --ssb 186 --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa
-```
-> [!NOTE]
-> Sometimes the Tx/Rx power gain does not start with the arguments provided, in that case, change the value, run, and then revert back to 120.
-
-> It is also found that UE does not attach to the CN on first try. In such case either wait for 15-30 sec or restart both gNB and UE
-
-**After the UE associates, open another session check the UE IP address.**
-
-Check UE IP address
-```
+# check UE IP address
 ifconfig oaitun_ue1
-```
-Add a route toward the CN traffic gen node
-```
+
+# add a route toward the CN traffic gen node
 sudo ip route add 192.168.70.0/24 dev oaitun_ue1
 ```
 
@@ -121,86 +125,23 @@ ping 192.168.70.135
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
-## Additional commands for debuggin ##
-- If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
-```
-/usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 80 --frame-rate 70 --bw 50e6
-```
 
-For GUI (you need X11 forwarding activated)
-```
-/usr/bin/uhd_fft -f 5754.72e6 -s 40e6 -g 76
-```
-If error exist related to platform plugin, exit and
-```
-export DISPLAY=:0
-ssh -X sayazm@ota-nuc1.emulab.net
-```
+Known Issues and Workarounds:
 
+- The oai-amf may not list all registered UEs in the assoicated log.
+- The gNodeB soft modem may spam warnings/errors about missed DCI or ULSCH
+  detections. It may crash unexpectedly.
+- Exiting the gNodeB soft modem with ctrl-c will often leave the SDR in a funny
+  state, so that the next time you start it, it may crash with a UHD error. If
+  this happens, simply start it again.
+- The module may not attach to the network or pick up an IP address on the first
+  try. If so, put the module into airplane mode with `sudo sh -c "chat -t 1 -sv ''
+  AT OK 'AT+CFUN=4' OK < /dev/ttyUSB2 > /dev/ttyUSB2"`, kill and restart
+  quectel-CM, then bring the module back online. If the module still fails to
+  associate and/or pick up an IP, try putting the module into airplane mode,
+  rebooting the associated NUC, and bringing the module back online again.
+- `chat` may return an error sometimes. If so, just run the command again.
 
-**Start trace on CN**
-
-```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
-
-
-**iperf test (Client (UE) to CN)**
-
-CN : `sudo docker exec -it oai-ext-dn iperf3 -s`
-UE : `iperf3 -c 192.168.70.135 -t 10`
-
-
-**iperf test (CN to UE (DL))**
-
-First find IP address of UE : ifconfig oaitun_ue1
-
-CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
-UE : `iperf3 -s`
-
-
-## How to take MAC layer Wireshark trace ##
-
-Simply call ```build_oai``` the usual way, for example ```./build_oai --eNB -w USRP```. The T tracer is compiled in by default.
-
-**Tracer Side**
-Go to the directory ```common/utils/T/tracer``` and do ```make```. This will locally compile all tracer executables, and place them in ```common/utils/T/tracer```. 
-
-In case of failure with one of the following errors:
-```/usr/bin/ld: cannot find -lXft```
-
-Run
-```sudo apt-get install libxft-dev```
-
-**Run the UE**
-Run the ue-softmodem with the option ```--T_stdout 2``` and it will wait for a tracer to connect to it before processing.
-```
-cd cmake_targets/ran_build/build
-sudo ./lte-softmodem -O [configuration file] --T_stdout 2
-```
-
-**Then Run Live usage**
-Launch wireshark and listen on the local interface (lo). Set the filter to ```udp.port==9999``` and read below for configuration.
-
-Browse to ```/var/tmp/oairan/common/utils/T/tracer/``` and run
-```
-./macpdu2wireshark -d /var/tmp/oairan/common/utils/T/T_messages.txt -live
-```
-
-
-### Configure Wireshark for 5G-NR ###
-Use a recent version of wireshark. The steps below were done using version 3.3.2. Maybe some options are different for your version of wireshark. Adapt as necessary.
-
-In the menu, choose ```Edit->Preferences```. In the preference window, unroll ```Protocols```.
-
-Go to ```MAC-NR```. Select both options (```Attempt to decode BCCH```, ```PCCH and CCCH data using NR RRC dissector``` and ```Attempt to dissect LCID 1-3 as srb1-3```).
-
-For Source of ```LCID -> drb channel settings``` choose option From ```static table```. Then click the Edit... button of ```LCID -> DRB Mappings Table```. In the new window, click on +. Choose LCID 4, DRBID 1, UL RLC Bearer Type AM, SN Len=18, same thing for DL RLC Bearer Type. Then click OK.
-
-Now, go to ```RLC-NR```. Select ```Call PDCP dissector for SRB PDUs```. For ```Call PDCP dissector for UL DRB PDUs``` choose ```18-bit SN```. Same for DL. Select ```Call RRC dissector for CCCH PDUs```. You don't need to select May see RLC headers only and Try to reassemble UM frames.
-
-Now, go to ```PDCP-NR```. Select what you want in there. It's good to select ```Show uncompressed User-Plane data as IP```. Also good to select ```Show unciphered Signalling-Plane data as RRC```. For ```Do sequence number analysis``` it can be good to use ```Only-RLC-frames``` but anything will do. We don't use ROHC so you don't need to select Attempt to decode ROHC data. And the layer info to show depends on what you want to analyse. ```Traffic Info``` is a good choice. You are done with the preferences. You can click OK.
-
-Then, in the menu ```Analyze```, choose ```Enabled Protocols```.... In the new window search for ```nr``` and ```select mac_nr_udp``` to have ```MAC-NR over UDP```. And that's it. Maybe other settings can be changed, but those steps should be
-enough for a start.
 """
 
 BIN_PATH = "/local/repository/bin"
@@ -213,7 +154,6 @@ COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 #TODO: check if merged to develop or develop now supports multiple UEs
 DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432" # 2023.wk19
 DEFAULT_NR_CN_HASH = "v1.5.0"
-# DEFAULT_NR_CN_HASH = "v2.1.0"
 OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
 
 
@@ -266,73 +206,51 @@ def x310_node_pair(idx, x310_radio):
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
 	node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
+def UE_node_x310(idx, x310_radio):
+	role = "ue"
+	ue = request.RawPC("{}-ue-comp".format(x310_radio))
+	ue.component_manager_id = COMP_MANAGER_ID
+	ue.hardware_type = params.sdr_nodetype
 
-def b210_nuc_pair_gnb(idx, b210_radio_gnb):
-    role = "nodeb"
-    gnb = request.RawPC("{}-gnb-comp".format(b210_radio_gnb))
-    gnb.component_manager_id = COMP_MANAGER_ID
-    gnb.component_id = b210_radio_gnb
-    gnb.hardware_type = params.sdr_nodetype # d430
+	if params.sdr_compute_image:
+		ue.disk_image = params.sdr_compute_image
+	else:
+		ue.disk_image = UBUNTU_IMG
 
-    nodeb_cn_if = gnb.addInterface("nodeb-cn-if")
-    nodeb_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 2), "255.255.255.0"))
-    cn_link.addInterface(nodeb_cn_if)
+	ue_radio_if = ue.addInterface("ue-usrp-if")
+	ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
 
-    if params.sdr_compute_image:
-        gnb.disk_image = params.sdr_compute_image
-    else:
-        gnb.disk_image = UBUNTU_IMG
+	radio_link = request.Link("radio-link-{}".format(idx))
+	radio_link.bandwidth = 10*1000*1000
+	radio_link.addInterface(ue_radio_if)
 
-    if params.oai_ran_commit_hash:
-        oai_ran_hash = params.oai_ran_commit_hash
-    else:
-        oai_ran_hash = DEFAULT_NR_RAN_HASH
+	radio = request.RawPC("{}-ue-sdr".format(x310_radio))
+	radio.component_id = x310_radio
+	radio.component_manager_id = COMP_MANAGER_ID
+	radio_link.addNode(radio)
 
-    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+	if params.oai_ran_commit_hash:
+		oai_ran_hash = params.oai_ran_commit_hash
+	else:
+		oai_ran_hash = DEFAULT_NR_RAN_HASH
 
-    cmd ="chmod +x /local/repository/bin/common.sh"
-    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+	cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
-    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-    gnb.addService(rspec.Execute(shell="bash", command=cmd))
+	cmd ="chmod +x /local/repository/bin/common.sh"
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
-    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-    gnb.addService(rspec.Execute(shell="bash", command=cmd))
-    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+	cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
+	cmd ="chmod +x /local/repository/bin/tune-sdr-iface.sh"
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
 
-def b210_nuc_pair_ue(idx, b210_radio):
-    role = "ue"
-    ue = request.RawPC("{}-ue-comp-".format(b210_radio))
-    ue.component_manager_id = COMP_MANAGER_ID
-    ue.component_id = b210_radio
-    ue.hardware_type = params.sdr_nodetype # d430
+	cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+	ue.addService(rspec.Execute(shell="bash", command=cmd))
+	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+	ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
-    if params.sdr_compute_image:
-        ue.disk_image = params.sdr_compute_image
-    else:
-        ue.disk_image = UBUNTU_IMG
-
-    if params.oai_ran_commit_hash:
-        oai_ran_hash = params.oai_ran_commit_hash
-    else:
-        oai_ran_hash = DEFAULT_NR_RAN_HASH
-
-    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-
-    cmd ="chmod +x /local/repository/bin/common.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-
-    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-
-    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
-    ue.addService(rspec.Execute(shell="bash", command=cmd))
-    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
 pc = portal.Context()
 
@@ -382,42 +300,32 @@ pc.defineParameter(
 )
 
 indoor_ota_x310s = [
-    ("ota-x310-1",
-     "USRP X310 #1"),
     ("ota-x310-3",
+     "USRP X310 #1"),
+    ("ota-x310-4",
      "USRP X310 #2"),
 ]
-#change
-indoor_ota_b210s = [
-    ("ota-nuc1", "UE # 1"),
-    ("ota-nuc2", "UE # 2"),
-    ("ota-nuc3", "UE # 3"),
-    ("ota-nuc4", "UE # 4"),
-]
-
 
 pc.defineParameter(
-    name="b210_radio_gnb",
-    description="B210 Radio (for OAI gNodeB)",
+    name="x310_radio",
+    description="X310 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[1],
-    legalValues=indoor_ota_b210s
+    defaultValue=indoor_ota_x310s[1],
+    legalValues=indoor_ota_x310s
 )
 
 pc.defineParameter(
-    name="b210_radio",
-    description="b210 Radio (for OAI UE)",
+    name="x310_radio_UE",
+    description="X310 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[3],
-    legalValues=indoor_ota_b210s
+    defaultValue=indoor_ota_x310s[0],
+    legalValues=indoor_ota_x310s
 )
-
-
 
 
 portal.context.defineStructParameter(
     "freq_ranges", "Frequency Ranges To Transmit In",
-    defaultValue=[{"freq_min": 5730.0, "freq_max": 5770.0}],
+    defaultValue=[{"freq_min": 5734.0, "freq_max": 5774.0}],
     multiValue=True,
     min=0,
     multiValueTitle="Frequency ranges to be used for transmission.",
@@ -451,7 +359,7 @@ cn_node.disk_image = UBUNTU_IMG
 cn_if = cn_node.addInterface("cn-if")
 cn_if.addAddress(rspec.IPv4Address("192.168.1.1", "255.255.255.0"))
 cn_link = request.Link("cn-link")
-# cn_link.bandwidth = 10*1000*1000
+cn_link.bandwidth = 10*1000*1000
 cn_link.addInterface(cn_if)
 
 if params.oai_cn_commit_hash:
@@ -471,10 +379,8 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single x310 for gNB and UE for now
-b210_nuc_pair_gnb(0, params.b210_radio_gnb)
-
-# Single b210 for UE
-b210_nuc_pair_ue(2, params.b210_radio)
+x310_node_pair(0, params.x310_radio)
+UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 
 for frange in params.freq_ranges:
