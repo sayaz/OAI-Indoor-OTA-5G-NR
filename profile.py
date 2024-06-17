@@ -304,7 +304,7 @@ def b210_nuc_pair_gnb(idx, b210_radio_gnb):
 
 
 # def b210_nuc_pair_ue(idx, b210_radio):
-def b210_nuc_pair_ue(idx,b210_radio):
+def b210_nuc_pair_ue(b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp-".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
@@ -401,7 +401,7 @@ pc.defineParameter(
     name="b210_radio_gnb",
     description="B210 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[2],
+    defaultValue=indoor_ota_b210s[1],
     legalValues=indoor_ota_b210s
 )
 
@@ -409,17 +409,17 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE 1)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[3],
+    defaultValue=indoor_ota_b210s[2],
     legalValues=indoor_ota_b210s
 )
 
-# pc.defineParameter(
-#     name="b210_radio",
-#     description="b210 Radio (for OAI UE 2)",
-#     typ=portal.ParameterType.STRING,
-#     defaultValue=indoor_ota_b210s[3],
-#     legalValues=indoor_ota_b210s
-# )
+pc.defineParameter(
+    name="b210_radio",
+    description="b210 Radio (for OAI UE 2)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_b210s[3],
+    legalValues=indoor_ota_b210s
+)
 
 
 portal.context.defineStructParameter(
@@ -478,15 +478,15 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
 # single b210 for gNB
-b210_nuc_pair_gnb(2, params.b210_radio_gnb)
+b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
-b210_nuc_pair_ue(3, params.b210_radio)
+# b210_nuc_pair_ue(1, params.b210_radio)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
-# for b210_node in ["ota-nuc3", "ota-nuc4"]:
-#     b210_nuc_pair_ue(b210_node)
+for b210_node in ["ota-nuc3", "ota-nuc4"]:
+    b210_nuc_pair_ue(b210_node)
 
 
 for frange in params.freq_ranges:
