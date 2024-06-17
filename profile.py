@@ -481,7 +481,7 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
-b210_nuc_pair_ue(1, params.b210_radio)
+b210_nuc_pair_ue(2, params.b210_radio)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
