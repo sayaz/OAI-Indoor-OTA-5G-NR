@@ -304,7 +304,7 @@ def b210_nuc_pair_gnb(idx, b210_radio_gnb):
 
 
 # def b210_nuc_pair_ue(idx, b210_radio):
-def b210_nuc_pair_ue(b210_radio):
+def b210_nuc_pair_ue(idx,b210_radio):
     role = "ue"
     ue = request.RawPC("{}-ue-comp-".format(b210_radio))
     ue.component_manager_id = COMP_MANAGER_ID
