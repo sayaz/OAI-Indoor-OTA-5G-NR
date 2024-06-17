@@ -470,10 +470,11 @@ cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
 
-# single x310 for gNB and UE for now
+# single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
 # Single b210 for UE
+b210_nuc_pair_ue(1, params.b210_radio)
 b210_nuc_pair_ue(2, params.b210_radio)
 
 
