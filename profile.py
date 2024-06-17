@@ -416,7 +416,7 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE 2)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[3],
+    defaultValue=indoor_ota_b210s[4],
     legalValues=indoor_ota_b210s
 )
 
