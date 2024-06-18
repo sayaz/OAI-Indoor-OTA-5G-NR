@@ -401,7 +401,7 @@ pc.defineParameter(
     name="b210_radio_gnb",
     description="B210 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[2],
+    defaultValue=indoor_ota_b210s[0],
     legalValues=indoor_ota_b210s
 )
 
@@ -417,7 +417,7 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE 2)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[3],
+    defaultValue=indoor_ota_b210s[2],
     legalValues=indoor_ota_b210s
 )
 
