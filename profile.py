@@ -401,7 +401,7 @@ pc.defineParameter(
     name="b210_radio_gnb",
     description="B210 Radio (for OAI gNodeB)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[0],
+    defaultValue=indoor_ota_b210s[1],
     legalValues=indoor_ota_b210s
 )
 
@@ -409,7 +409,7 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE 1)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[1],
+    defaultValue=indoor_ota_b210s[2],
     legalValues=indoor_ota_b210s
 )
 
@@ -417,7 +417,7 @@ pc.defineParameter(
     name="b210_radio",
     description="b210 Radio (for OAI UE 2)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_b210s[2],
+    defaultValue=indoor_ota_b210s[3],
     legalValues=indoor_ota_b210s
 )
 
@@ -485,7 +485,7 @@ b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
-for b210_node in ["ota-nuc2", "ota-nuc4"]:
+for b210_node in ["ota-nuc1", "ota-nuc3", "ota-nuc4"]:
     b210_nuc_pair_ue(b210_node)
 
 
