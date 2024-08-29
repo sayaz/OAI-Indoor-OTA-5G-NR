@@ -215,6 +215,7 @@ DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432" # 2023.wk19
 DEFAULT_NR_CN_HASH = "v1.5.0"
 # DEFAULT_NR_CN_HASH = "v2.1.0"
 OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
+WIFI_AP_NODE_ID="ayaz-ap"
 
 
 def x310_node_pair(idx, x310_radio):
@@ -335,6 +336,28 @@ def b210_nuc_pair_ue(b210_radio):
     # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
     # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
+def alloc_wifi_resources():
+    # Allocate WiFi utility node
+    util = request.RawPC("wifi-util")
+    util.component_manager_id = COMP_MANAGER_ID
+    util.hardware_type = params.util_nodetype
+    if params.util_image:
+        util.disk_image = params.util_image
+    else:
+        util.disk_image = UBUNTU_IMG
+    util_if = util.addInterface("util-if")
+    util_if.addAddress(rspec.IPv4Address("192.168.1.10", "255.255.255.0"))
+
+    # Allocate WiFi access point
+    wifi = request.RawPC("wifi-ap")
+    wifi.component_manager_id = COMP_MANAGER_ID
+    wifi.component_id = WIFI_AP_NODE_ID
+
+    # Connect WiFi utility node and AP with link
+    wifi_link = request.Link("wifi-util-link", members = [util_if, wifi])
+    wifi_link.bandwidth = 1*1000*1000 # 1 Gbps
+
+
 pc = portal.Context()
 
 node_types = [
@@ -343,10 +366,17 @@ node_types = [
 ]
 
 pc.defineParameter(
+    name="alloc_wifi",
+    description="Allocate WiFi resources (access point and utilty server)?",
+    typ=portal.ParameterType.BOOLEAN,
+    defaultValue=True
+)
+
+pc.defineParameter(
     name="sdr_nodetype",
     description="Type of compute node paired with the SDRs",
     typ=portal.ParameterType.STRING,
-    defaultValue=node_types[0],
+    defaultValue=node_types[1],
     legalValues=node_types
 )
 
@@ -354,7 +384,15 @@ pc.defineParameter(
     name="cn_nodetype",
     description="Type of compute node to use for CN node (if included)",
     typ=portal.ParameterType.STRING,
-    defaultValue=node_types[1],
+    defaultValue=node_types[0],
+    legalValues=node_types
+)
+
+pc.defineParameter(
+    name="util_nodetype",
+    description="Type of compute node to use for the WiFi utility server",
+    typ=portal.ParameterType.STRING,
+    defaultValue=node_types[0],
     legalValues=node_types
 )
 
@@ -377,6 +415,14 @@ pc.defineParameter(
 pc.defineParameter(
     name="sdr_compute_image",
     description="Image to use for compute connected to SDRs",
+    typ=portal.ParameterType.STRING,
+    defaultValue="",
+    advanced=True
+)
+
+pc.defineParameter(
+    name="util_image",
+    description="Image to use for WiFi utility server",
     typ=portal.ParameterType.STRING,
     defaultValue="",
     advanced=True
@@ -466,7 +512,6 @@ if params.oai_cn_commit_hash:
 else:
     oai_cn_hash = DEFAULT_NR_CN_HASH
 
-
 cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
@@ -476,6 +521,9 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
+# Allocate wifi resources?
+if params.alloc_wifi:
+    alloc_wifi_resources()
 
 # single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
