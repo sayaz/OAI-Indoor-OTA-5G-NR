@@ -13,7 +13,7 @@ tourDescription = """
 # OAI 5G using the POWDER Indoor OTA Lab 
 
 This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
-standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
+standalone (SA) mode using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
 - 4x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
@@ -26,13 +26,14 @@ Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/
 The following will be deployed:
 
 - A d740 compute node for CN
-- Two of the four indoor OTA B210 as UE and gNB
+- 1xB210 as UE
+- 1xB210 as gNB
 - NUC compute node for UE and gNB
 """
 
 tourInstructions = """
 
-After all startup scripts have finished...
+After all startup scripts have finished, and experiment is ready to start:
 
 ## Core Network ##
 
@@ -40,10 +41,11 @@ Start the 5G core network services. It will take several seconds for the service
 
 ```
 cd /var/tmp/oai-cn5g-fed/docker-compose
+
 sudo python3 ./core-network.py --type start-mini --scenario 1
 ```
 
-In yet another session, start following the logs for the AMF. This way you can see when the UE syncs with the network.
+In another session, start following the logs for the AMF. This way you can see when the UE syncs with the network.
 
 ```
 sudo docker logs -f oai-amf
@@ -51,15 +53,19 @@ sudo docker logs -f oai-amf
 
 ## gNB ##
 
-If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf` and edit line `48`, `49`, `51` and `71`.
+If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf` and edit the following parameters:
+```
+absoluteFrequencySSB  = 783648;
+dl_frequencyBand      = 46;
+dl_absoluteFrequencyPointA = 782376;
+ul_frequencyBand = 46;
+```
 
 You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},`
 
 Once completed, you need to build/compile:
 
 ```
-/var/tmp/oairan/cmake_targets/build_oai -I --ninja
-
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --build-lib nrscope --gNB --ninja
 ```
 
@@ -70,18 +76,11 @@ For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
 
-For ```PRB = 51```, ```SCS = 30``` KHz and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.51PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28
-```
-
 ## UE ##
 
-Similarly if you want to make any change in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
+Similarly to make changes in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
 
 ```
-/var/tmp/oairan/cmake_targets/build_oai -I --ninja
-
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
 ```
 
@@ -91,33 +90,30 @@ For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 ```
 sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf  -r 106  -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa --tune-offset 23040000
 ```
-For ```PRB = 51```, ```SCS = 30 KHz``` and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -O /var/tmp/etc/oai/ue.conf  -r 51  -C 5754720000  --ssb 186 --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa
-```
+
 > [!NOTE]
-> Sometimes the Tx/Rx power gain does not start with the arguments provided, in that case, change the value, run, and then revert back to 120.
+> Sometimes if the Tx/Rx power gain is low, the UE may receive a low power from gNMB and may not start with the arguments provided, in that case, try different gain values.
 
-> It is also found that UE does not attach to the CN on first try. In such case either wait for 15-30 sec or restart both gNB and UE
+> It is also found that UE does not attach to the CN on first try. In such case restart both gNB and UE.
 
-**After the UE associates, open another session check the UE IP address.**
+**After the UE associates (check from AMF logs in CN), open another session check the UE IP address.**
 
 Check UE IP address
 ```
 ifconfig oaitun_ue1
 ```
-Add a route toward the CN traffic gen node
+Add a route toward the CN for traffic gen node
 ```
 sudo ip route add 192.168.70.0/24 dev oaitun_ue1
 ```
+Check UE-CN reachability
 
-You should now be able to generate traffic in either direction:
-
+# From UE to CN (in session on UE node)
 ```
-# from UE to CN traffic gen node (in session on ue node)
 ping 192.168.70.135
+```
 
-# from CN traffic generation service to UE (in session on cn node)
+# From CN to UE (in session on cn node)
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
