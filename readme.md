@@ -4,10 +4,6 @@ This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
 The indoor OTA lab includes:
 
-- 4x NI X310 SDRs, each with a UBX-160 daughter card occupying channel 0. The
-  TX/RX and RX2 ports on this channel are connected to broadband antennas. The
-  SDRs are connected via fiber to near-edge compute resources.
-
 You can find a diagram of the lab layout here: [OTA Lab
 Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
 
