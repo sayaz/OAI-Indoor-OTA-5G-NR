@@ -2,14 +2,13 @@
 
 This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
-The indoor OTA lab includes:
 
-You can find a diagram of the lab layout here: [OTA Lab
+A schematic of the OTA lab layout can be found here: [OTA Lab
 Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
 
-The following will be deployed:
+The following will be deployed while this profile is in use:
 
-- A d740 compute node as 5G-CN.
+- A d430 compute node as 5G-CN.
 - 3 x USRP-B210 as UE.
 - 1 x USRP-B210 OTA as gNB.
 - NUC compute nodes for UE and gNB.
@@ -45,7 +44,10 @@ dl_absoluteFrequencyPointA = 782376;
 ul_frequencyBand = 46;
 ```
 
-You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},`
+You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with 
+```
+{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},
+```
 
 Once completed, you need to build/compile:
 
@@ -62,8 +64,11 @@ sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/bui
 
 ## UE ##
 
-Similarly to make changes in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
-
+Similarly to make changes in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89`  
+```
+{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},
+```
+and build
 ```
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
 ```
@@ -76,28 +81,28 @@ sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/b
 ```
 
 > [!NOTE]
-> Sometimes if the Tx/Rx power gain is low, the UE may receive a low power from gNMB and may not start with the arguments provided, in that case, try different gain values.
+> Sometimes if the Tx/Rx power gain is low, the UE may receive a low RSRP from gNB and may not synch with gNB, in that case, try different gain values.
 
-> It is also found that UE does not attach to the CN on first try. In such case restart both gNB and UE.
+> It is also found that UE does not attach to the gNB/CN on first try. In such case restart both gNB and UE.
 
 **After the UE associates, open another session check the UE IP address.**
 
-Check UE IP address
+Check UE IP address (from UE session)
 ```
 ifconfig oaitun_ue1
 ```
-Add a route toward the CN traffic gen node
+Add a route toward the CN traffic gen node (from UE session)
 ```
 sudo ip route add 192.168.70.0/24 dev oaitun_ue1
 ```
 
-You should now be able to generate traffic in either direction:
+Check reachability from either UE/gNB:
 
 ```
-# from UE to CN traffic gen node (in session on ue node)
+# from UE to CN traffic gen node (from UE session)
 ping 192.168.70.135
 
-# from CN traffic generation service to UE (in session on cn node)
+# from CN traffic generation service to UE (from CN session)
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
 
