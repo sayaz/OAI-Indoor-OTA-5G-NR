@@ -82,10 +82,9 @@ sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/b
 
 > [!NOTE]
 > Sometimes if the Tx/Rx power gain is low, the UE may receive a low RSRP from gNB and may not synch with gNB, in that case, try different gain values.
-
 > It is also found that UE does not attach to the gNB/CN on first try. In such case restart both gNB and UE.
 
-**After the UE associates, open another session check the UE IP address.**
+**After the UE associates with CN (check from AMF logs), open another session check the UE IP address.**
 
 Check UE IP address (from UE session)
 ```
@@ -105,6 +104,22 @@ ping 192.168.70.135
 # from CN traffic generation service to UE (from CN session)
 sudo docker exec -it oai-ext-dn ping <UE IP address>
 ```
+
+## Traffic generation
+[iperf3 documentation](https://iperf.fr/iperf-doc.php)
+
+**Use iperf3 (Client (UE) to CN)**
+
+CN : `sudo docker exec -it oai-ext-dn iperf3 -s`
+UE : `iperf3 -c 192.168.70.135 -t 10`
+
+
+**Use iperf test (CN to UE (DL))**
+
+First find IP address of UE : ifconfig oaitun_ue1
+
+CN : `sudo docker exec -it oai-ext-dn iperf3 -c <UE IP address>`
+UE : `iperf3 -s`
 
 ## Additional commands for debuggin ##
 - If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
@@ -128,18 +143,7 @@ ssh -X sayazm@ota-nuc1.emulab.net
 ```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
 
 
-**iperf test (Client (UE) to CN)**
 
-CN : `sudo docker exec -it oai-ext-dn iperf3 -s`
-UE : `iperf3 -c 192.168.70.135 -t 10`
-
-
-**iperf test (CN to UE (DL))**
-
-First find IP address of UE : ifconfig oaitun_ue1
-
-CN : `sudo docker exec -it oai-ext-dn iperf3 -c 12.1.1.151`
-UE : `iperf3 -s`
 
 
 ## How to take MAC layer Wireshark trace ##
