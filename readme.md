@@ -140,7 +140,7 @@ ssh -X sayazm@ota-nuc1.emulab.net
 ## Wi-Fi Network ##
 - `Wi-Fi util` with IP `192.168.1.10` node works as a server in the Wi-Fi network connected to the Wi-Fi AP on Eth interface.
 - `Wi-Fi` AP with IP `192.168.1.2` is the Wi-Fi AP (TP-Link N750) router with dd-wrt firmware.
-- A Wi-Fi with IP `192.168.1.128` is connected to the Wi-Fi AP.
+- A Wi-Fi client with IP `192.168.1.128` is connected to the Wi-Fi AP. For accessing the client device `ssh ansr@ayaz-laptop.emulab.net`.
 
 To check if Wi-Fi is enabled in the Wi-Fi client
 ```
@@ -160,6 +160,16 @@ sudo nmcli device wifi connect dd-wrt-5GHz password <password>
 ```
 
 Once connected check reachability with `ping`.
+
+**Traffic generation in Wi-Fi network**
+
+**Use iperf3 (Wi-Fi Client to Wi-Fi server)**
+
+Wi-Fi Server : ` iperf3 -s`
+Wi-Fi Client : `iperf3 -c 192.168.70.10`
+
+You can use `-R` option at Wi-Fi client for traffic in reverse direction
+
 **Start trace on CN**
 
 ```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
