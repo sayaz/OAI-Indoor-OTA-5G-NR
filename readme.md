@@ -163,8 +163,6 @@ Once connected check reachability with `ping`.
 
 **Traffic generation in Wi-Fi network**
 
-**Use iperf3 (Wi-Fi Client to Wi-Fi server)**
-
 Wi-Fi Server : ` iperf3 -s`
 Wi-Fi Client : `iperf3 -c 192.168.70.10`
 
