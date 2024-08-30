@@ -37,15 +37,19 @@ sudo docker logs -f oai-amf
 
 ## gNB ##
 
-If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band78.fr1.106PRB.usrpx310.conf` and edit line `48`, `49`, `51` and `71`.
+If you need to change the frequency parameters of gNB, open file `/var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf` and edit the following parameters:
+```
+absoluteFrequencySSB  = 783648;
+dl_frequencyBand      = 46;
+dl_absoluteFrequencyPointA = 782376;
+ul_frequencyBand = 46;
+```
 
 You also need to edit file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},`
 
 Once completed, you need to build/compile:
 
 ```
-/var/tmp/oairan/cmake_targets/build_oai -I --ninja
-
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --build-lib nrscope --gNB --ninja
 ```
 
@@ -56,18 +60,11 @@ For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem -E  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.106PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28 --tune-offset 23040000
 ```
 
-For ```PRB = 51```, ```SCS = 30``` KHz and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0 /var/tmp/oairan/cmake_targets/ran_build/build/nr-softmodem  -O /var/tmp/etc/oai/gnb.sa.band46.fr1.51PRB.usrpx310.conf --gNBs.[0].min_rxtxtime 6 --sa --MACRLCs.[0].dl_max_mcs 28
-```
-
 ## UE ##
 
-Similarly if you want to make any change in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
+Similarly to make changes in the frequency edit the file `/var/tmp/oairan/common/utils/nr/nr_common.c` insert an additional line between `87 and 89` with `{46,  5150000, 5925000, 5150000, 5925000,  1, 743333,  15},` and build
 
 ```
-/var/tmp/oairan/cmake_targets/build_oai -I --ninja
-
 /var/tmp/oairan/cmake_targets/build_oai -w USRP --nrUE --ninja 
 ```
 
@@ -77,14 +74,11 @@ For ```PRB = 106```, ```SCS = 30 KHz``` and ```band = n46```:
 ```
 sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -E -O /var/tmp/etc/oai/ue.conf  -r 106  -C 5754720000  --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa --tune-offset 23040000
 ```
-For ```PRB = 51```, ```SCS = 30 KHz``` and ```band = n46```:
-```
-sudo numactl --membind=0 --cpubind=0   /var/tmp/oairan/cmake_targets/ran_build/build/nr-uesoftmodem -O /var/tmp/etc/oai/ue.conf  -r 51  -C 5754720000  --ssb 186 --usrp-args "clock_source=internal,type=b200"  --band 46  --numerology 1  --ue-fo-compensation  --ue-txgain 0   --ue-rxgain 120   --nokrnmod   --dlsch-parallel 4   --sa
-```
-> [!NOTE]
-> Sometimes the Tx/Rx power gain does not start with the arguments provided, in that case, change the value, run, and then revert back to 120.
 
-> It is also found that UE does not attach to the CN on first try. In such case either wait for 15-30 sec or restart both gNB and UE
+> [!NOTE]
+> Sometimes if the Tx/Rx power gain is low, the UE may receive a low power from gNMB and may not start with the arguments provided, in that case, try different gain values.
+
+> It is also found that UE does not attach to the CN on first try. In such case restart both gNB and UE.
 
 **After the UE associates, open another session check the UE IP address.**
 
