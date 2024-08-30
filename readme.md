@@ -122,7 +122,7 @@ CN : `sudo docker exec -it oai-ext-dn iperf3 -c <UE IP address>`
 UE : `iperf3 -s`
 
 ## Additional commands for debuggin ##
-- If you want to see the spectrum you can use any of the below commands. Press `l` to decrease the reference level:
+- To visualize an spectrum in the terminal you can use any of the below commands. Press `l` to decrease the power reference level:
 ```
 /usr/lib/uhd/examples/rx_ascii_art_dft --freq 5754.72e6 --rate 40e6 --gain 80 --frame-rate 70 --bw 50e6
 ```
@@ -131,19 +131,38 @@ For GUI (you need X11 forwarding activated)
 ```
 /usr/bin/uhd_fft -f 5754.72e6 -s 40e6 -g 76
 ```
-If error exist related to platform plugin, exit and
+If error exist related to platform plugin, exit and use:
 ```
 export DISPLAY=:0
 ssh -X sayazm@ota-nuc1.emulab.net
 ```
 
+## Wi-Fi Network ##
+- `Wi-Fi util` with IP `192.168.1.10` node works as a server in the Wi-Fi network connected to the Wi-Fi AP on Eth interface.
+- `Wi-Fi` AP with IP `192.168.1.2` is the Wi-Fi AP (TP-Link N750) router with dd-wrt firmware.
+- A Wi-Fi with IP `192.168.1.128` is connected to the Wi-Fi AP.
 
+To check if Wi-Fi is enabled in the Wi-Fi client
+```
+sudo nmcl radio
+```
+To turn on/off the Wi-Fi on the client device
+```
+sudo nmcli radio wifi on
+```
+To see available SSIDs to connect
+```
+sudo nmcli device wifi list
+```
+To connect to the experiment's Wi-Fi AP
+```
+sudo nmcli device wifi connect dd-wrt-5GHz password <password>
+```
+
+Once connected check reachability with `ping`.
 **Start trace on CN**
 
 ```sudo tcpdump -i demo-oai   -f "not arp and not port 53 and not host archive.ubuntu.com and not host security.ubuntu.com" -w /users/sayazm/5G_5Gz_Testing.pcap```
-
-
-
 
 
 ## How to take MAC layer Wireshark trace ##
