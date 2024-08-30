@@ -1,4 +1,4 @@
-# OAI 5G using the POWDER Indoor OTA Lab 
+# 5G-NR & Wi-Fi Coexistence Experiment (5 GHz band) Indoor OTA Lab
 
 This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
 standalone mode using resources in the POWDER indoor over-the-air (OTA) lab.
@@ -9,9 +9,14 @@ Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/
 
 The following will be deployed:
 
-- A d740 compute node for CN
-- Two of the four indoor OTA B210 as UE and gNB
-- NUC compute node for UE and gNB
+- A d740 compute node as 5G-CN.
+- 3 x USRP-B210 as UE.
+- 1 x USRP-B210 OTA as gNB.
+- NUC compute nodes for UE and gNB.
+- A Wi-Fi AP connected with a compute node.
+- A Wi-Fi Client connected to Wi-Fi AP (WLAN).
+
+![Screenshot 2024-08-29 at 6 03 15 PM](https://github.com/user-attachments/assets/81e08335-38ef-4ccd-8427-dc1daf907947)
 
 After all startup scripts have finished...
 
@@ -24,7 +29,7 @@ cd /var/tmp/oai-cn5g-fed/docker-compose
 sudo python3 ./core-network.py --type start-mini --scenario 1
 ```
 
-In yet another session, start following the logs for the AMF. This way you can see when the UE syncs with the network.
+In another session, start following the logs for the AMF. This way you can see when the UE/gNB syncs with the network.
 
 ```
 sudo docker logs -f oai-amf
