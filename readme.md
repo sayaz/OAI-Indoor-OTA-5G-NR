@@ -144,7 +144,7 @@ ssh -X sayazm@ota-nuc1.emulab.net
 
 To check if Wi-Fi is enabled in the Wi-Fi client
 ```
-sudo nmcl radio
+sudo nmcli radio
 ```
 To turn on/off the Wi-Fi on the client device
 ```
