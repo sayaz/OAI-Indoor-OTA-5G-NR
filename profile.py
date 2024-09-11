@@ -526,7 +526,7 @@ b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
-for b210_node in ["ota-nuc1", "ota-nuc2"]:
+for b210_node in ["ota-nuc2"]:
     b210_nuc_pair_ue(b210_node)
 
 
