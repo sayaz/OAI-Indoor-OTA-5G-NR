@@ -429,9 +429,9 @@ indoor_ota_x310s = [
 ]
 #change
 indoor_ota_b210s = [
-    ("ota-nuc1", "UE # 1"),
-    ("ota-nuc2", "UE # 2"),
-    ("ota-nuc3", "UE # 3"),
+    ("ota-nuc1", "gNB"),
+    ("ota-nuc2", "UE # 1"),
+    #("ota-nuc3", "UE # 3"),
     #("ota-nuc4", "UE # 4"),
 ]
 
