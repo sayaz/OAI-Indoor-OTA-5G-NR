@@ -431,7 +431,7 @@ indoor_ota_x310s = [
 indoor_ota_b210s = [
     ("ota-nuc1", "gNB"),
     ("ota-nuc2", "UE # 1"),
-    #("ota-nuc3", "UE # 3"),
+    ("ota-nuc3", "UE # 3"),
     #("ota-nuc4", "UE # 4"),
 ]
 
@@ -452,13 +452,13 @@ pc.defineParameter(
     legalValues=indoor_ota_b210s
 )
 
-# pc.defineParameter(
-#     name="b210_radio",
-#     description="b210 Radio (for OAI UE 2)",
-#     typ=portal.ParameterType.STRING,
-#     defaultValue=indoor_ota_b210s[0],
-#     legalValues=indoor_ota_b210s
-# )
+pc.defineParameter(
+    name="b210_radio",
+    description="b210 Radio (for OAI UE 2)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_b210s[2],
+    legalValues=indoor_ota_b210s
+)
 
 
 portal.context.defineStructParameter(
@@ -526,7 +526,7 @@ b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
-for b210_node in ["ota-nuc2"]:
+for b210_node in ["ota-nuc2", "ota-nuc3"]:
     b210_nuc_pair_ue(b210_node)
 
 
