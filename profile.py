@@ -514,9 +514,9 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
-# Allocate wifi resources?
-if params.alloc_wifi:
-    alloc_wifi_resources()
+# # Allocate wifi resources?
+# if params.alloc_wifi:
+#     alloc_wifi_resources()
 
 # single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
