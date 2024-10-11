@@ -337,7 +337,7 @@ def b210_nuc_pair_esc(b210_radio):
     esc.hardware_type = params.sdr_nodetype # d430
 
     esc_cn_if = esc.addInterface("esc-cn-if")
-    esc_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 3), "255.255.255.0"))
+    esc_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format('5'), "255.255.255.0"))
     cn_link.addInterface(esc_cn_if)
 
     if params.sdr_compute_image:
