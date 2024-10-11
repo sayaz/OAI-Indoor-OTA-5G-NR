@@ -555,8 +555,8 @@ if params.alloc_wifi:
 
 
 b210_nuc_pair_gnb(0, params.b210_radio_gnb) # B210 for gNB
-b210_nuc_pair_ue(1, params.b210_radio) # B210 for UE-1
-b210_nuc_pair_esc(2, params.b210_radio) # B210 for ESC
+b210_nuc_pair_ue("ota-nuc2") # B210 for UE-1
+b210_nuc_pair_esc("ota-nuc3") # B210 for ESC
 
 
 # require all indoor OTA nucs for now
