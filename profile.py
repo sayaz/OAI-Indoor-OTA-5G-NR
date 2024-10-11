@@ -329,6 +329,41 @@ def b210_nuc_pair_ue(b210_radio):
     # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
     # ue.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 
+def b210_nuc_pair_esc(b210_radio):
+    role = "esc"
+    esc = request.RawPC("{}-esc-comp-".format(b210_radio))
+    esc.component_manager_id = COMP_MANAGER_ID
+    esc.component_id = b210_radio
+    esc.hardware_type = params.sdr_nodetype # d430
+
+    esc_cn_if = esc.addInterface("esc-cn-if")
+    esc_cn_if.addAddress(rspec.IPv4Address("192.168.1.{}".format(idx + 3), "255.255.255.0"))
+    cn_link.addInterface(esc_cn_if)
+
+    if params.sdr_compute_image:
+        esc.disk_image = params.sdr_compute_image
+    else:
+        esc.disk_image = UBUNTU_IMG
+
+    if params.oai_ran_commit_hash:
+        oai_ran_hash = params.oai_ran_commit_hash
+    else:
+        oai_ran_hash = DEFAULT_NR_RAN_HASH
+
+    cmd ="chmod +x /local/repository/bin/deploy-oai.sh"
+    esc.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/common.sh"
+    esc.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd ="chmod +x /local/repository/bin/tune-cpu.sh"
+    esc.addService(rspec.Execute(shell="bash", command=cmd))
+
+    cmd = '{} "{}" {}'.format(OAI_DEPLOY_SCRIPT, oai_ran_hash, role)
+    esc.addService(rspec.Execute(shell="bash", command=cmd))
+
+
+
 def alloc_wifi_resources():
     # Allocate WiFi utility node
     util = request.RawPC("wifi-util")
@@ -431,7 +466,7 @@ indoor_ota_x310s = [
 indoor_ota_b210s = [
     ("ota-nuc1", "gNB"),
     ("ota-nuc2", "UE # 1"),
-    ("ota-nuc3", "UE # 3"),
+    ("ota-nuc3", "ESC # 3"),
     #("ota-nuc4", "UE # 4"),
 ]
 
@@ -454,7 +489,7 @@ pc.defineParameter(
 
 pc.defineParameter(
     name="b210_radio",
-    description="b210 Radio (for OAI UE 2)",
+    description="b210 Radio (for OAI ESC)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_b210s[2],
     legalValues=indoor_ota_b210s
@@ -514,20 +549,19 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 cmd = "{} '{}' {}".format(OAI_DEPLOY_SCRIPT, oai_cn_hash, role)
 cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 
-# # Allocate wifi resources?
-# if params.alloc_wifi:
-#     alloc_wifi_resources()
+# Allocate wifi resources?
+if params.alloc_wifi:
+    alloc_wifi_resources()
 
-# single b210 for gNB
-b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 
-# Single b210 for UE
-# b210_nuc_pair_ue(1, params.b210_radio)
-# b210_nuc_pair_ue(2, params.b210_radio)
+b210_nuc_pair_gnb(0, params.b210_radio_gnb) # B210 for gNB
+b210_nuc_pair_ue(1, params.b210_radio) # B210 for UE-1
+b210_nuc_pair_esc(2, params.b210_radio) # B210 for ESC
+
 
 # require all indoor OTA nucs for now
-for b210_node in ["ota-nuc2", "ota-nuc3"]:
-    b210_nuc_pair_ue(b210_node)
+# for b210_node in ["ota-nuc2", "ota-nuc3"]:
+#     b210_nuc_pair_ue(b210_node)
 
 
 for frange in params.freq_ranges:
