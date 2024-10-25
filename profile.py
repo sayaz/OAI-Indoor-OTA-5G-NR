@@ -207,8 +207,8 @@ COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 #DEFAULT_NR_RAN_HASH = "1268b27c91be3a568dd352f2e9a21b3963c97432" # 2023.wk19
 #DEFAULT_NR_CN_HASH = "v1.5.0"
 
-DEFAULT_NR_RAN_HASH = "develop" # 2023.wk19
-DEFAULT_NR_CN_HASH = "develop"
+DEFAULT_NR_RAN_HASH = "2024.w42" # 2023.wk19
+DEFAULT_NR_CN_HASH = "2024.w42"
 
 # DEFAULT_NR_CN_HASH = "v2.1.0"
 OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
