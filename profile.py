@@ -426,10 +426,8 @@ pc.defineParameter(
 )
 
 indoor_ota_x310s = [
-    ("ota-x310-1",
-     "USRP X310 #1"),
-    ("ota-x310-3",
-     "USRP X310 #2"),
+    ("ota-x310-4",
+     "USRP X310 #4"),
 ]
 #change
 indoor_ota_b210s = [
@@ -462,6 +460,14 @@ pc.defineParameter(
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_b210s[2],
     legalValues=indoor_ota_b210s
+)
+
+pc.defineParameter(
+    name="x310_radio",
+    description="X310 Radio (for OAI gNodeB)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_x310s[0],
+    legalValues=indoor_ota_x310s
 )
 
 
@@ -521,6 +527,9 @@ cn_node.addService(rspec.Execute(shell="bash", command=cmd))
 # Allocate wifi resources?
 if params.alloc_wifi:
     alloc_wifi_resources()
+
+# single x310 for gNB and UE for now
+x310_node_pair(0, params.x310_radio)
 
 # single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
