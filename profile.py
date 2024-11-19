@@ -426,8 +426,8 @@ pc.defineParameter(
 )
 
 indoor_ota_x310s = [
-    ("ota-x310-4",
-     "USRP X310 #4"),
+    ("ota-x310-2",
+     "USRP X310 #2"),
 ]
 #change
 indoor_ota_b210s = [
@@ -539,7 +539,7 @@ b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
-for b210_node in ["ota-nuc2", "ota-nuc3"]:
+for b210_node in ["ota-nuc1", "ota-nuc2", "ota-nuc3"]:
     b210_nuc_pair_ue(b210_node)
 
 
