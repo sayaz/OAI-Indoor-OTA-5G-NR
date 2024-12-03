@@ -429,15 +429,6 @@ pc.defineParameter(
     legalValues=node_types
 )
 
-##
-pc.defineParameter(
-    name="x310_radio_UE",
-    description="X310 Radio (for OAI UE)",
-    typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_x310s[1],
-    legalValues=indoor_ota_x310s
-)
-##
 pc.defineParameter(
     name="cn_nodetype",
     description="Type of compute node to use for CN node (if included)",
@@ -522,6 +513,16 @@ pc.defineParameter(
     defaultValue=indoor_ota_b210s[2],
     legalValues=indoor_ota_b210s
 )
+
+##
+pc.defineParameter(
+    name="x310_radio_UE",
+    description="X310 Radio (for OAI UE)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_x310s[1],
+    legalValues=indoor_ota_x310s
+)
+##
 
 pc.defineParameter(
     name="x310_radio",
