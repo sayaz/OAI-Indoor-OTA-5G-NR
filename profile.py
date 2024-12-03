@@ -594,6 +594,7 @@ x310_node_pair(0, params.x310_radio)
 
 # single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
+UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 # Single b210 for UE
 # b210_nuc_pair_ue(1, params.b210_radio)
