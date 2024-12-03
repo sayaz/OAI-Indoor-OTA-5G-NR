@@ -426,8 +426,8 @@ pc.defineParameter(
 )
 
 indoor_ota_x310s = [
-    ("ota-x310-2",
-     "USRP X310 #2"),
+    ("ota-x310-1", "USRP X310 #1"),
+    ("ota-x310-2", "USRP X310 #2"),
 ]
 #change
 indoor_ota_b210s = [
