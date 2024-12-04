@@ -213,7 +213,7 @@ DEFAULT_NR_CN_HASH = "v1.5.0"
 # DEFAULT_NR_CN_HASH = "v2.1.0"
 OAI_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-oai.sh")
 WIFI_AP_NODE_ID="ayaz-ap"
-
+WIFI_CLIENT_NODE_ID="ayaz-laptop"
 
 def x310_node_pair(idx, x310_radio):
     role = "nodeb"
@@ -398,13 +398,21 @@ def alloc_wifi_resources():
     util_if.addAddress(rspec.IPv4Address("192.168.1.10", "255.255.255.0"))
 
     # Allocate WiFi access point
-    wifi = request.RawPC("wifi-ap")
-    wifi.component_manager_id = COMP_MANAGER_ID
-    wifi.component_id = WIFI_AP_NODE_ID
+    wifiap = request.RawPC("wifi-ap")
+    wifiap.component_manager_id = COMP_MANAGER_ID
+    wifiap.component_id = WIFI_AP_NODE_ID
 
-    # Connect WiFi utility node and AP with link
-    wifi_link = request.Link("wifi-util-link", members = [util_if, wifi])
-    wifi_link.bandwidth = 1*1000*1000 # 1 Gbps
+    # Allocate WiFi client laptop
+    wificl = request.RawPC("wifi-client")
+    wificl.component_manager_id = COMP_MANAGER_ID
+    wificl.component_id = WIFI_CLIENT_NODE_ID
+
+    # Connect WiFi utility node, ap, and client to a LAN
+    wifi_lan = request.Lan("wifi-util-lan")
+    wifi_lan.bandwidth = 1*1000*1000 # 1 Gbps
+    wifi_lan.addInterface(util_if)
+    wifi_lan.addNode(wifiap)
+    wifi_lan.addNode(wificl)
 
 
 pc = portal.Context()
