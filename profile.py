@@ -408,7 +408,7 @@ def alloc_wifi_resources():
     wificl.component_id = WIFI_CLIENT_NODE_ID
 
     # Connect WiFi utility node, ap, and client to a LAN
-    wifi_lan = request.Lan("wifi-util-lan")
+    wifi_lan = request.LAN("wifi-util-lan")
     wifi_lan.bandwidth = 1*1000*1000 # 1 Gbps
     wifi_lan.addInterface(util_if)
     wifi_lan.addNode(wifiap)
