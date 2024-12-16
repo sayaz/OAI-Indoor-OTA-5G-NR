@@ -551,7 +551,7 @@ pc.defineParameter(
 
 
 pc.defineParameter(
-    name="x310_radio",
+    name="x310_radio_UE",
     description="X310 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[2],
@@ -559,7 +559,7 @@ pc.defineParameter(
 )
 
 pc.defineParameter(
-    name="x310_radio",
+    name="x310_radio_UE",
     description="X310 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[3],
