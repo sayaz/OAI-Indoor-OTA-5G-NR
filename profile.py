@@ -642,7 +642,7 @@ for b210_node in ["ota-nuc2", "ota-nuc3", "ota-nuc4"]:
 
 # require all indoor OTA nucs for now
 for x310_node in ["ota-x310-2", "ota-x310-3", "ota-x310-4"]:
-    b210_nuc_pair_ue(b210_node)
+    UE_node_x310(x310_node)
 
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
