@@ -488,13 +488,15 @@ pc.defineParameter(
 indoor_ota_x310s = [
     ("ota-x310-1", "USRP X310 #1"),
     ("ota-x310-2", "USRP X310 #2"),
+    ("ota-x310-3", "USRP X310 #3"),
+    ("ota-x310-4", "USRP X310 #4"),
 ]
 #change
 indoor_ota_b210s = [
     ("ota-nuc1", "gNB"),
     ("ota-nuc2", "UE # 1"),
     ("ota-nuc3", "UE # 3"),
-    #("ota-nuc4", "UE # 4"),
+    ("ota-nuc4", "UE # 4"),
 ]
 
 
@@ -522,7 +524,23 @@ pc.defineParameter(
     legalValues=indoor_ota_b210s
 )
 
-##
+pc.defineParameter(
+    name="b210_radio",
+    description="b210 Radio (for OAI UE 3)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_b210s[3],
+    legalValues=indoor_ota_b210s
+)
+
+
+pc.defineParameter(
+    name="x310_radio",
+    description="X310 Radio (for OAI gNodeB)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_x310s[0],
+    legalValues=indoor_ota_x310s
+)
+
 pc.defineParameter(
     name="x310_radio_UE",
     description="X310 Radio (for OAI UE)",
@@ -530,13 +548,21 @@ pc.defineParameter(
     defaultValue=indoor_ota_x310s[1],
     legalValues=indoor_ota_x310s
 )
-##
+
 
 pc.defineParameter(
     name="x310_radio",
-    description="X310 Radio (for OAI gNodeB)",
+    description="X310 Radio (for OAI UE)",
     typ=portal.ParameterType.STRING,
-    defaultValue=indoor_ota_x310s[0],
+    defaultValue=indoor_ota_x310s[2],
+    legalValues=indoor_ota_x310s
+)
+
+pc.defineParameter(
+    name="x310_radio",
+    description="X310 Radio (for OAI UE)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=indoor_ota_x310s[3],
     legalValues=indoor_ota_x310s
 )
 
@@ -599,20 +625,21 @@ if params.alloc_wifi:
     alloc_wifi_resources()
 
 # single x310 for gNB and UE for now
-x310_node_pair(0, params.x310_radio)
+UE_node_x310(1, params.x310_radio_UE)
+UE_node_x310(2, params.x310_radio_UE)
+UE_node_x310(3, params.x310_radio_UE)
 
 # single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
-UE_node_x310(1, params.x310_radio_UE) #### This is for x310 UE
 
 # Single b210 for UE
 # b210_nuc_pair_ue(1, params.b210_radio)
 # b210_nuc_pair_ue(2, params.b210_radio)
 
 # require all indoor OTA nucs for now
-for b210_node in ["ota-nuc2", "ota-nuc3"]:
+for b210_node in ["ota-nuc2", "ota-nuc3", "ota-nuc3"]:
     b210_nuc_pair_ue(b210_node)
-
+	
 
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
