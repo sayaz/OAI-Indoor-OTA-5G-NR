@@ -486,12 +486,12 @@ pc.defineParameter(
 )
 
 indoor_ota_x310s = [
-    ("ota-x310-1", "USRP X310 #1"),
-    ("ota-x310-2", "USRP X310 #2"),
-    ("ota-x310-3", "USRP X310 #3"),
-    ("ota-x310-4", "USRP X310 #4"),
+    ("ota-x310-1", "gNB"),
+    ("ota-x310-2", "UE X310 #2"),
+    ("ota-x310-3", "UE X310 #3"),
+    ("ota-x310-4", "UE X310 #4"),
 ]
-#change
+
 indoor_ota_b210s = [
     ("ota-nuc1", "gNB"),
     ("ota-nuc2", "UE # 1"),
@@ -543,7 +543,7 @@ pc.defineParameter(
 
 pc.defineParameter(
     name="x310_radio_UE",
-    description="X310 Radio (for OAI UE 1)",
+    description="x310 Radio (for OAI UE 1)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[1],
     legalValues=indoor_ota_x310s
@@ -552,7 +552,7 @@ pc.defineParameter(
 
 pc.defineParameter(
     name="x310_radio_UE",
-    description="X310 Radio (for OAI UE 2)",
+    description="x310 Radio (for OAI UE 2)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[2],
     legalValues=indoor_ota_x310s
@@ -560,7 +560,7 @@ pc.defineParameter(
 
 pc.defineParameter(
     name="x310_radio_UE",
-    description="X310 Radio (for OAI UE 3)",
+    description="x310 Radio (for OAI UE 3)",
     typ=portal.ParameterType.STRING,
     defaultValue=indoor_ota_x310s[3],
     legalValues=indoor_ota_x310s
@@ -626,7 +626,7 @@ if params.alloc_wifi:
 
 # single x310 for gNB and UE for now
 x310_node_pair(1, params.x310_radio)
-UE_node_x310(2, params.x310_radio_UE)
+# UE_node_x310(2, params.x310_radio_UE)
 
 
 # single b210 for gNB
@@ -640,10 +640,9 @@ b210_nuc_pair_gnb(0, params.b210_radio_gnb)
 for b210_node in ["ota-nuc2", "ota-nuc3", "ota-nuc4"]:
     b210_nuc_pair_ue(b210_node)
 
-# require all indoor OTA nucs for now
-# for x310_node in ["ota-x310-2", "ota-x310-3", "ota-x310-4"]:
-#     UE_node_x310(x310_node, params.x310_radio_UE)
-
+for x310_node in ["ota-x310-2", "ota-x310-3", "ota-x310-4"]:
+    UE_node_x310(x310_node)
+	
 for frange in params.freq_ranges:
     request.requestSpectrum(frange.freq_min, frange.freq_max, 0)
 
