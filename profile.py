@@ -625,7 +625,9 @@ if params.alloc_wifi:
     alloc_wifi_resources()
 
 # single x310 for gNB and UE for now
-UE_node_x310(1, params.x310_radio_UE)
+x310_node_pair(1, params.x310_radio)
+UE_node_x310(2, params.x310_radio_UE)
+
 
 # single b210 for gNB
 b210_nuc_pair_gnb(0, params.b210_radio_gnb)
