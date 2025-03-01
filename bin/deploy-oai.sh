@@ -28,23 +28,15 @@ function setup_cn_node {
       apt-transport-https \
       ca-certificates \
       curl \
+      docker.io \
+      docker-compose-v2 \
       gnupg \
       lsb-release
 
-    printf "adding docker gpg key"
-    until curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -; do
-        printf '.'
-        sleep 2
-    done
-
-    sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     sudo add-apt-repository -y ppa:wireshark-dev/stable
     echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
 
     sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo apt-get install -y \
-        docker-ce \
-        docker-ce-cli \
-        containerd.io \
         wireshark \
         tshark
 
@@ -92,7 +84,6 @@ function setup_cn_node {
     cd $SRCDIR
     git clone --branch $COMMIT_HASH $OAI_CN5G_REPO oai-cn5g-fed
     cd oai-cn5g-fed
-    # git checkout develop
     git checkout -f $COMMIT_HASH
     ./scripts/syncComponents.sh
     echo cloning and syncing oai-cn5g-fed... done.
@@ -126,7 +117,6 @@ function setup_ran_node {
     cd $SRCDIR
     git clone $OAI_RAN_MIRROR oairan
     cd oairan
-    # git checkout develop
     git checkout $COMMIT_HASH
 
     source oaienv
