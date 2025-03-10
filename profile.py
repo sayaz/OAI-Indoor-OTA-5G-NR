@@ -337,7 +337,7 @@ def b210_nuc_pair_ue(b210_radio):
 
 
 ####
-def UE_node_x310(x310_radio):
+def UE_node_x310(idx, x310_radio):
 	role = "ue"
 	ue = request.RawPC("{}-ue-comp".format(x310_radio))
 	ue.component_manager_id = COMP_MANAGER_ID
@@ -350,9 +350,9 @@ def UE_node_x310(x310_radio):
 
 	ue_radio_if = ue.addInterface("ue-usrp-if")
 	# ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.1", "255.255.255.0"))
-	ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.{}".format(x310_radio + 2), "255.255.255.0"))
+	ue_radio_if.addAddress(rspec.IPv4Address("192.168.40.{}".format(idx + 2), "255.255.255.0"))
 
-	radio_link = request.Link("radio-link-{}".format(x310_radio))
+	radio_link = request.Link("radio-link-{}".format(idx))
 	radio_link.bandwidth = 10*1000*1000
 	radio_link.addInterface(ue_radio_if)
 
@@ -627,10 +627,8 @@ if params.alloc_wifi:
 
 # single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
-# UE_node_x310(1, params.x310_radio_UE)
+UE_node_x310(1, params.x310_radio_UE)
 #UE_node_x310(2, params.x310_radio_UE)
-for x310_node in ["ota-x310-2", "ota-x310-3", "ota-x310-4"]:
-	UE_node_x310(x310_node)
 
 
 # single b210 for gNB
