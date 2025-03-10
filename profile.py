@@ -9,28 +9,7 @@ import geni.rspec.emulab.pnext as PN
 import geni.rspec.emulab.spectrum as spectrum
 
 
-tourDescription = """
-# OAI 5G using the POWDER Indoor OTA Lab 
-
-This profile instantiates an experiment for testing OAI 5G with SDR based UEs in
-standalone (SA) mode using resources in the POWDER indoor over-the-air (OTA) lab.
-The indoor OTA lab includes:
-
-You can find a diagram of the lab layout here: [OTA Lab
-Diagram](https://gitlab.flux.utah.edu/powderrenewpublic/powder-deployment/-/raw/master/diagrams/ota-lab.png)
-
-The following will be deployed:
-
-- Two d430 compute node for CN and Wi-Fi AP Mgt.
-- Two NUC compute node for UE and gNB
-- 1xB210 as UE
-- 1xB210 as gNB
-
-"""
-
 tourInstructions = """
-
-After all startup scripts have finished, and experiment is ready to start:
 
 ## Core Network ##
 
@@ -628,7 +607,7 @@ if params.alloc_wifi:
 # single x310 for gNB and UE for now
 x310_node_pair(0, params.x310_radio)
 UE_node_x310(1, params.x310_radio_UE)
-#UE_node_x310(2, params.x310_radio_UE)
+UE_node_x310(2, params.x310_radio_UE)
 
 
 # single b210 for gNB
